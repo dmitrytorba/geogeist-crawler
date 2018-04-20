@@ -7,6 +7,7 @@ import pysal
 import math
 import pyproj
 
+
 lat = 38.6949602
 lon = -121.2272932
 r = requests.get('https://geo.fcc.gov/api/census/area',
