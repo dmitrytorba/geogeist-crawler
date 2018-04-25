@@ -7,9 +7,6 @@ import pysal
 import math
 import pyproj
 
-
-#lat = 38.6949602
-#lon = -121.2272932
 def get_data(lat, lon):
     r = requests.get('https://geo.fcc.gov/api/census/area',
                      params={'format':'json', 'lat':lat, 'lon': lon})
@@ -71,3 +68,8 @@ def get_data(lat, lon):
     data['name'] = here.BASENAME
     data['population'] = here.POP100
     return data
+
+if __name__ == "__main__":
+    lat = 38.6950677
+    lon = -121.2273321
+    print(get_data(lat,lon))
