@@ -9,11 +9,14 @@ build: static/main.css static/main.js
 static/main.css: main.sass
 	sassc $? > $@
 
-static/main.js: main.es6.js 
-	$(BABEL_CMD) $? > $@
+static/main.js: graph.es6.js main.es6.js 
+	$(BABEL_CMD) $? --out-file $@
 
 run: build
 	flask run
 
 install:
 	npm install
+
+clean:
+	rm static/*
