@@ -9,8 +9,8 @@ build: static/main.css static/main.js
 static/main.css: main.sass
 	sassc $? > $@
 
-static/main.js: graph.es6.js main.es6.js 
-	$(BABEL_CMD) $? --out-file $@
+static/main.js: js/graph.es6.js js/main.es6.js 
+	$(BABEL_CMD) js --out-file $@
 
 run: build
 	flask run

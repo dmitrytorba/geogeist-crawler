@@ -70,6 +70,6 @@ def get_data(lat, lon):
     return data
 
 if __name__ == "__main__":
-    lat = 38.6950677
-    lon = -121.2273321
+    lat=38.7937531
+    lon=-121.2420338
     print(get_data(lat,lon))

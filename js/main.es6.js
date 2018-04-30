@@ -1,3 +1,15 @@
+function censusPlaceHtml(conf) {
+    var html = `
+      <article class="tile is-child">
+        <div class="content">
+         <p class="title">${conf.name}</p>
+         <p class="subtitle">Population: ${conf.population}</p>
+        </div>
+      </article>`
+    
+    return html
+}
+    
 var x = document.getElementById("demo");
 
 function getLocation() {
@@ -8,8 +20,12 @@ function getLocation() {
     }
 }
 
-function render(data) {
-    $("#demo").html(data);
+function render(res) {
+    var data = JSON.parse(res)
+    $("#demo").html(censusPlaceHtml({
+	name: data.name,
+	population: data.population
+    }));
 }
 
 function showPosition(position) {

@@ -5,7 +5,8 @@
   "main": "server.py",
   "dependencies": {
     "babel-cli": "^6.24.1",
-    "bulma": "^0.5.0"
+    "bulma": "^0.5.0",
+    "mdi": "^2.2.43"
   },
   "devDependencies": {},
   "scripts": {
