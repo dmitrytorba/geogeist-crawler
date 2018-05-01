@@ -50,6 +50,7 @@ def get_data(lat, lon):
     inProj = pyproj.Proj(init='epsg:4326')
     outProj = pyproj.Proj(init='epsg:3857')
     census_coord = pyproj.transform(inProj,outProj,lon,lat)
+    print(here)
     if here.geometry.contains_point(census_coord):
         print('found!')
 
@@ -63,7 +64,6 @@ def get_data(lat, lon):
     
     # near.geometry.apply(pysal.cg.shapes.Polygon.contains_point, args=[(lat,lon)])
 
-    print(here)
     data = {}
     data['name'] = here.BASENAME
     data['population'] = here.POP100

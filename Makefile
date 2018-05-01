@@ -19,4 +19,6 @@ install:
 	npm install
 
 clean:
-	rm static/*
+	rm static/main.js
+	rm static/main.css
+	rm ./*.pkl
