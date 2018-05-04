@@ -33,43 +33,46 @@ def get_data(lat, lon):
         geodata = pd.read_pickle(file_name)
     except:
         print('downloading geodata for state_fips=' + fcc_data['state_fips'])
-        geodata = conn.mapservice.query(layer=36, where='STATE = '+fcc_data['state_fips'])
+        geodata = conn.mapservice.query(layer=36, where='STATE='+fcc_data['state_fips'])
         geodata.to_pickle(file_name)
     
     d = pd.merge(data, geodata, left_on='place', right_on='PLACE', how='outer')
 
     # find only non-NaN entries (are the NaNs bugs??)
     d = d.query('CENTLAT == CENTLAT')
-    
+
+    # sort by distance to here
     lat_delta = d.CENTLAT.apply(float)-lat
     lon_delta = d.CENTLON.apply(float)-lon
     d['dist'] = (lat_delta.apply(math.pow, args=[2])+lon_delta.apply(math.pow, args=[2])).apply(math.sqrt)
     d = d.sort_values(by=['dist'])
     
-    here = d.iloc[0]
-    inProj = pyproj.Proj(init='epsg:4326')
-    outProj = pyproj.Proj(init='epsg:3857')
-    census_coord = pyproj.transform(inProj,outProj,lon,lat)
-    print(here)
-    if here.geometry.contains_point(census_coord):
-        print('found!')
-
     # find places near here
     how_near = 0.2
     lat_near = abs(d.CENTLAT.apply(float)-lat)<how_near
     lon_near = abs(d.CENTLON.apply(float)-lon)<how_near
     near = d[lat_near & lon_near]
 
-    # here = d[near.geometry.contains_point((lat, lon))]
-    
-    # near.geometry.apply(pysal.cg.shapes.Polygon.contains_point, args=[(lat,lon)])
+    # convert projections
+    inProj = pyproj.Proj(init='epsg:4326')
+    outProj = pyproj.Proj(init='epsg:3857')
+    census_coord = pyproj.transform(inProj,outProj,lon,lat)
+
+    # search for geometry that contains location
+    here = near[near.geometry.apply(lambda x: x.contains_point(census_coord))]
 
     data = {}
-    data['name'] = here.BASENAME
-    data['population'] = here.POP100
+    if len(here.index) > 0:
+        here = here.iloc[0]
+        data['name'] = here.BASENAME
+        data['population'] = here.POP100
     return data
 
 if __name__ == "__main__":
+    # CDP Polygon 
+    #lat = 38.6950677
+    #lon = -121.2273321
+    # Incorporated Polygon with holes 
     lat=38.7937531
     lon=-121.2420338
     print(get_data(lat,lon))
