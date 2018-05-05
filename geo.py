@@ -7,34 +7,39 @@ import pysal
 import math
 import pyproj
 
+conn = c.base.Connection('DecennialSF12010')
+conn.set_mapservice('tigerWMS_Census2010')
+
+def cached_query(state_fips, cols=[], is_map=False):
+    file_name = 'census_state_' + state_fips
+    if is_map:
+        file_name += '.map'
+    file_name += '.pkl'
+
+    try:
+        data = pd.read_pickle(file_name)
+    except:
+        print('downloading census for state_fips='+state_fips)
+        if is_map:
+            data = conn.mapservice.query(layer=36,
+                                         where='STATE='+state_fips)
+        else:
+            data = conn.query(cols,
+                              geo_unit = 'place:*',
+                              geo_filter = {'state':state_fips})
+    data.to_pickle(file_name)
+    return data
+
 def get_data(lat, lon):
     r = requests.get('https://geo.fcc.gov/api/census/area',
                      params={'format':'json', 'lat':lat, 'lon': lon})
     fcc_data = r.json()['results'][0]
 
-    conn = c.base.Connection('DecennialSF12010')
-    conn.set_mapservice('tigerWMS_Census2010')
-
     cols = conn.varslike('H00[0123]*', engine='fnmatch')
     cols.append('NAME')
 
-    file_name = 'census_data_state_' + fcc_data['state_fips'] + '.pkl'
-    try:
-        data = pd.read_pickle(file_name)
-    except:
-        print('downloading census for state_fips=' + fcc_data['state_fips'])
-        data = conn.query(cols,
-                      geo_unit = 'place:*',
-                      geo_filter = {'state':fcc_data['state_fips']})
-    data.to_pickle(file_name)
-    
-    file_name = 'census_geodata_state_' + fcc_data['state_fips'] + '.pkl'
-    try:
-        geodata = pd.read_pickle(file_name)
-    except:
-        print('downloading geodata for state_fips=' + fcc_data['state_fips'])
-        geodata = conn.mapservice.query(layer=36, where='STATE='+fcc_data['state_fips'])
-        geodata.to_pickle(file_name)
+    data = cached_query(fcc_data['state_fips'], cols=cols)
+    geodata = cached_query(fcc_data['state_fips'], is_map=True)
     
     d = pd.merge(data, geodata, left_on='place', right_on='PLACE', how='outer')
 
