@@ -10,8 +10,10 @@ import pyproj
 conn = c.base.Connection('DecennialSF12010')
 conn.set_mapservice('tigerWMS_Census2010')
 
-def cached_query(state_fips, geo_unit, cols=[], is_map=False):
+def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
     file_name = 'census_state_' + state_fips + '_' + geo_unit
+    if geo_unit == 'tract':
+        file_name += '_' + county
     if is_map:
         file_name += '.map'
     file_name += '.pkl'
@@ -25,12 +27,17 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False):
                 'place': 36,
                 'tract': 14
                 }
-            data = conn.mapservice.query(layer=layers[geo_unit],
-                                         where='STATE='+state_fips)
+            w = 'STATE=' + state_fips
+            if geo_unit == 'tract':
+               w = 'county=' + county 
+            data = conn.mapservice.query(layer=layers[geo_unit], where=w)
         else:
+            g_filter = { 'state': state_fips }
+            #if geo_unit == 'tract':
+            #    g_filter['county'] = county
             data = conn.query(cols,
                               geo_unit = geo_unit + ':*',
-                              geo_filter = {'state':state_fips})
+                              geo_filter = g_filter)
     data.to_pickle(file_name)
     return data
 
@@ -48,14 +55,18 @@ def get_place_data(state_fips):
 
     return d
 
-def get_tract_data(state_fips):
+def get_tract_data(state_fips, county):
     cols = conn.varslike('H00[0123]*', engine='fnmatch')
     cols.append('NAME')
 
     data = cached_query(state_fips, 'tract', cols=cols)
-    geodata = cached_query(state_fips, 'tract', is_map=True)
+    geodata = cached_query(state_fips, 'tract', is_map=True, county=county)
     
-    return data, geodata
+    d = pd.merge(data, geodata, left_on='tract', right_on='TRACT', how='outer')
+
+    d = d.query('CENTLAT == CENTLAT')
+
+    return d
 
 def get_county_data(state_fips):
     cols = ['NAME']
@@ -114,8 +125,16 @@ def get_data(lat, lon):
             'name': here.BASENAME,
             'population': here.POP100
         }
-
-
+        tracts = get_tract_data(fcc_data['state_fips'], county=here.COUNTY)
+        tracts_near = find_near(tracts, lat, lon, 0.05)
+        tract_here = find_here(tracts_near, lat, lon)
+        if len(tract_here.index) > 0:
+            here = tract_here.iloc[0]
+            data['tract'] = {
+                'name': here.BASENAME,
+                'population': here.POP100
+            }
+        
     if len(place_here.index) > 0:
         here = place_here.iloc[0]
         data['place'] = {
