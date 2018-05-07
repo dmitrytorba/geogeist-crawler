@@ -10,8 +10,8 @@ import pyproj
 conn = c.base.Connection('DecennialSF12010')
 conn.set_mapservice('tigerWMS_Census2010')
 
-def cached_query(state_fips, cols=[], is_map=False):
-    file_name = 'census_state_' + state_fips
+def cached_query(state_fips, geo_unit, cols=[], is_map=False):
+    file_name = 'census_state_' + state_fips + '_' + geo_unit
     if is_map:
         file_name += '.map'
     file_name += '.pkl'
@@ -19,33 +19,50 @@ def cached_query(state_fips, cols=[], is_map=False):
     try:
         data = pd.read_pickle(file_name)
     except:
-        print('downloading census for state_fips='+state_fips)
         if is_map:
-            data = conn.mapservice.query(layer=36,
+            layers = {
+                'place': 36,
+                'tract': 14
+                }
+            data = conn.mapservice.query(layer=layers[geo_unit],
                                          where='STATE='+state_fips)
         else:
             data = conn.query(cols,
-                              geo_unit = 'place:*',
+                              geo_unit = geo_unit + ':*',
                               geo_filter = {'state':state_fips})
     data.to_pickle(file_name)
     return data
 
-def get_data(lat, lon):
-    r = requests.get('https://geo.fcc.gov/api/census/area',
-                     params={'format':'json', 'lat':lat, 'lon': lon})
-    fcc_data = r.json()['results'][0]
-
+def get_place_data(state_fips):
     cols = conn.varslike('H00[0123]*', engine='fnmatch')
     cols.append('NAME')
 
-    data = cached_query(fcc_data['state_fips'], cols=cols)
-    geodata = cached_query(fcc_data['state_fips'], is_map=True)
+    data = cached_query(state_fips, 'place', cols=cols)
+    geodata = cached_query(state_fips, 'place', is_map=True)
     
     d = pd.merge(data, geodata, left_on='place', right_on='PLACE', how='outer')
 
     # find only non-NaN entries (are the NaNs bugs??)
     d = d.query('CENTLAT == CENTLAT')
 
+    return d
+
+def get_tract_data(state_fips):
+    cols = conn.varslike('H00[0123]*', engine='fnmatch')
+    cols.append('NAME')
+
+    data = cached_query(state_fips, 'tract', cols=cols)
+    geodata = cached_query(state_fips, 'tract', is_map=True)
+    
+    return data, geodata
+    
+def get_data(lat, lon):
+    r = requests.get('https://geo.fcc.gov/api/census/area',
+                     params={'format':'json', 'lat':lat, 'lon': lon})
+    fcc_data = r.json()['results'][0]
+
+    d = get_place_data(fcc_data['state_fips'])
+    
     # sort by distance to here
     lat_delta = d.CENTLAT.apply(float)-lat
     lon_delta = d.CENTLON.apply(float)-lon
@@ -81,3 +98,4 @@ if __name__ == "__main__":
     lat=38.7937531
     lon=-121.2420338
     print(get_data(lat,lon))
+    #print(get_tract_data('06'))
