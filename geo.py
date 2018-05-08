@@ -56,8 +56,10 @@ def get_place_data(state_fips):
     return d
 
 def get_tract_data(state_fips, county):
-    cols = conn.varslike('H00[0123]*', engine='fnmatch')
+    # housing units, occupied, vacant
+    cols = ['H0030001','H0030002','H0030003']
     cols.append('NAME')
+    print(cols)
 
     data = cached_query(state_fips, 'tract', cols=cols)
     geodata = cached_query(state_fips, 'tract', is_map=True, county=county)
@@ -137,9 +139,12 @@ def get_data(lat, lon):
         
     if len(place_here.index) > 0:
         here = place_here.iloc[0]
+        print(here)
         data['place'] = {
             'name': here.BASENAME,
-            'population': here.POP100
+            'population': here.POP100,
+            'houses': here.H0030001,
+            'vacant': here.H0030003/here.H0030002
         }
 
     return data
