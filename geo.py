@@ -42,8 +42,14 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
     return data
 
 def get_place_data(state_fips):
-    cols = conn.varslike('H00[0123]*', engine='fnmatch')
-    cols.append('NAME')
+    population_age = conn.varslike('P01200[01234][0-9]', engine='fnmatch')
+    races = conn.varslike('H006000[2-8]', engine='fnmatch')
+    household = conn.varslike('H013000[2-8]', engine='fnmatch')
+    other_vars = ['NAME','H0030001','H0030002','H0030003',
+                  'H0040002','H0040003','H0040004',
+                  'H0110001','H0110002','H0110003','H0110004',
+                  'H0050006','H0050007', 'H0070001']
+    cols = population_age + races + household + other_vars
 
     data = cached_query(state_fips, 'place', cols=cols)
     geodata = cached_query(state_fips, 'place', is_map=True)
@@ -56,11 +62,7 @@ def get_place_data(state_fips):
     return d
 
 def get_tract_data(state_fips, county):
-    # housing units, occupied, vacant
-    cols = ['H0030001','H0030002','H0030003']
-    cols.append('NAME')
-    print(cols)
-
+    cols = ['NAME', 'H0030001','H0030002','H0030003']
     data = cached_query(state_fips, 'tract', cols=cols)
     geodata = cached_query(state_fips, 'tract', is_map=True, county=county)
     
@@ -142,9 +144,104 @@ def get_data(lat, lon):
         print(here)
         data['place'] = {
             'name': here.BASENAME,
-            'population': here.POP100,
+            'population': {
+                'total': here.POP100,
+                'male': {
+                    'total': here.P0120002,
+                    'under-5': here.P0120003,
+                    '5-9': here.P0120004,
+                    '10-14': here.P0120005,
+                    '15-17': here.P0120006,
+                    '18-19': here.P0120007,
+                    '20': here.P0120008,
+                    '21': here.P0120009,
+                    '22-24': here.P0120010,
+                    '25-29': here.P0120011,
+                    '30-34': here.P0120012,
+                    '35-39': here.P0120013,
+                    '40-44': here.P0120014,
+                    '45-49': here.P0120015,
+                    '50-54': here.P0120016,
+                    '55-59': here.P0120017,
+                    '60-61': here.P0120018,
+                    '62-64': here.P0120019,
+                    '65-66': here.P0120020,
+                    '67-69': here.P0120021,
+                    '70-74': here.P0120022,
+                    '75-79': here.P0120023,
+                    '80-84': here.P0120024,
+                    '85+': here.P0120025,
+                },
+                'female': {
+                    'total': here.P0120026,
+                    'under-5': here.P0120027,
+                    '5-9': here.P0120028,
+                    '10-14': here.P0120029,
+                    '15-17': here.P0120030,
+                    '18-19': here.P0120031,
+                    '20': here.P0120032,
+                    '21': here.P0120033,
+                    '22-24': here.P0120034,
+                    '25-29': here.P0120035,
+                    '30-34': here.P0120036,
+                    '35-39': here.P0120037,
+                    '40-44': here.P0120038,
+                    '45-49': here.P0120039,
+                    '50-54': here.P0120040,
+                    '55-59': here.P0120041,
+                    '60-61': here.P0120042,
+                    '62-64': here.P0120043,
+                    '65-66': here.P0120044,
+                    '67-69': here.P0120045,
+                    '70-74': here.P0120046,
+                    '75-79': here.P0120047,
+                    '80-84': here.P0120048,
+                    '85+': here.P0120049,
+                },
+            }, 
             'houses': here.H0030001,
-            'vacant': here.H0030003/here.H0030002
+            'occupied': {
+                'total': {
+                    'houses': here.H0030003,
+                    'people': here.H0110001
+                },
+                'mortgage': {
+                    'houses': here.H0040002,
+                    'people': here.H0110002
+                },
+                'free-clear': {
+                    'houses': here.H0040003,
+                    'people': here.H0110003
+                },
+                'renters': {
+                    'houses': here.H0040004,
+                    'people': here.H0110004
+                },
+                'races': {
+                    'white': here.H0060002,
+                    'black': here.H0060003,
+                    'asian': here.H0060004,
+                    'islander': here.H0060005,
+                    'native': here.H0060006,
+                    'other': here.H0060007,
+                    'mixed': here.H0060008,
+                    'hispanic': here.H0070001,
+                },
+                'household-size-houses': {
+                    '1': here.H0130002,
+                    '2': here.H0130003,
+                    '3': here.H0130004,
+                    '4': here.H0130005,
+                    '5': here.H0130006,
+                    '6': here.H0130007,
+                    '7+': here.H0130008,
+                }
+            },
+            'vacant': {
+                'total': here.H0030002,
+                'seasonal': here.H0050006,
+                'migrants': here.H0050007,
+            }
         }
 
     return data
