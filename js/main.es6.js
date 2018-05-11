@@ -1,41 +1,45 @@
-function censusPlaceHtml(conf) {
+function tileHtml(title, subtitle) {
     var html = `
-      <article class="tile is-child">
+      <div class="tile is-parent">
+      <article class="tile is-child box">
         <div class="content">
-         <p class="title">${conf.name}</p>
-         <p class="subtitle">Population: ${conf.population}</p>
+         <p class="title">${title}</p>
+         <p class="subtitle">${subtitle}</p>
         </div>
-      </article>`
+      </article>
+      </div>`
     
     return html
 }
     
-var x = document.getElementById("demo");
+var coords = {}
 
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else { 
-        x.innerHTML = "Geolocation is not supported by this browser.";
-    }
+if (navigator.geolocation) {
+    coords.source = 'browser'
+    navigator.geolocation.getCurrentPosition(showPosition);
+} else { 
+    coords.source = 'ip'
+    $.get("/data", render);
 }
 
 function render(res) {
     var data = JSON.parse(res)
-    $("#demo").html(censusPlaceHtml({
-	name: data.name,
-	population: data.population
-    }));
+    $(".tile-area").append(tileHtml(data.county.name, data.county.population));
+    if (data.place) {
+	$(".tile-area").append(tileHtml(data.place.name, data.place.population));
+    }
+    if (data.tract) {
+	$(".tile-area").append(tileHtml(data.tract.name, data.tract.population));
+    }
 }
 
 function showPosition(position) {
-    var lat = position.coords.latitude; 
-    var lon = position.coords.longitude;
-    x.innerHTML = "Latitude: " + lat + 
-	"<br>Longitude: " + lon; 
+    coords.lat = position.coords.latitude; 
+    coords.lon = position.coords.longitude;
+    $(".tile-area").append(tileHtml(coords.lat, coords.lon));
 
     $.get("/data", {
-	lat: lat,
-	lon: lon
+	lat: coords.lat,
+	lon: coords.lon
     }, render);
 }
