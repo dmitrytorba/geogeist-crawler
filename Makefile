@@ -13,10 +13,10 @@ static/main.js: js/graph.es6.js js/main.es6.js
 	$(BABEL_CMD) js --out-file $@
 
 run: build
-	export FLASK_APP=server.py
-	flask run
+	FLASK_APP=server.py flask run
 
 install:
+	mkdir -p static
 	npm install
 
 clean:
