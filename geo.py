@@ -41,7 +41,7 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
     data.to_pickle(file_name)
     return data
 
-def get_place_data(state_fips):
+def get_cols():
     population_age = conn.varslike('P01200[01234][0-9]', engine='fnmatch')
     races = conn.varslike('H006000[2-8]', engine='fnmatch')
     household = conn.varslike('H013000[2-8]', engine='fnmatch')
@@ -50,8 +50,10 @@ def get_place_data(state_fips):
                   'H0110001','H0110002','H0110003','H0110004',
                   'H0050006','H0050007', 'H0070001']
     cols = population_age + races + household + other_vars
+    return cols
 
-    data = cached_query(state_fips, 'place', cols=cols)
+def get_place_data(state_fips):
+    data = cached_query(state_fips, 'place', cols=get_cols())
     geodata = cached_query(state_fips, 'place', is_map=True)
     
     d = pd.merge(data, geodata, left_on='place', right_on='PLACE', how='outer')
@@ -63,7 +65,7 @@ def get_place_data(state_fips):
 
 def get_tract_data(state_fips, county):
     cols = ['NAME', 'H0030001','H0030002','H0030003']
-    data = cached_query(state_fips, 'tract', cols=cols)
+    data = cached_query(state_fips, 'tract', cols=get_cols())
     geodata = cached_query(state_fips, 'tract', is_map=True, county=county)
     
     d = pd.merge(data, geodata, left_on='tract', right_on='TRACT', how='outer')
@@ -75,7 +77,7 @@ def get_tract_data(state_fips, county):
 def get_county_data(state_fips):
     cols = ['NAME']
  
-    data = cached_query(state_fips, 'county', cols=cols)
+    data = cached_query(state_fips, 'county', cols=get_cols())
     geodata = cached_query(state_fips, 'county', is_map=True)
 
     d = pd.merge(data, geodata, left_on='county', right_on='COUNTY', how='outer')
@@ -109,40 +111,8 @@ def find_here(near, lat, lon):
 
     return here
 
-def get_data(lat, lon):
-    r = requests.get('https://geo.fcc.gov/api/census/area',
-                     params={'format':'json', 'lat':lat, 'lon': lon})
-    fcc_data = r.json()['results'][0]
-
-    counties = get_county_data(fcc_data['state_fips'])
-    counties_near = find_near(counties, lat, lon, 1)
-    county_here = find_here(counties_near, lat, lon)
-    
-    places = get_place_data(fcc_data['state_fips'])
-    places_near = find_near(places, lat, lon, 0.1)
-    place_here = find_here(places_near, lat, lon)
-    
-    data = {}
-    if len(county_here.index) > 0:
-        here = county_here.iloc[0]
-        data['county'] = {
-            'name': here.BASENAME,
-            'population': here.POP100
-        }
-        tracts = get_tract_data(fcc_data['state_fips'], county=here.COUNTY)
-        tracts_near = find_near(tracts, lat, lon, 0.05)
-        tract_here = find_here(tracts_near, lat, lon)
-        if len(tract_here.index) > 0:
-            here = tract_here.iloc[0]
-            data['tract'] = {
-                'name': here.BASENAME,
-                'population': here.POP100
-            }
-        
-    if len(place_here.index) > 0:
-        here = place_here.iloc[0]
-        print(here)
-        data['place'] = {
+def data_json(here):
+    return {
             'name': here.BASENAME,
             'population': {
                 'total': here.POP100,
@@ -243,6 +213,35 @@ def get_data(lat, lon):
                 'migrants': here.H0050007,
             }
         }
+
+
+def get_data(lat, lon):
+    r = requests.get('https://geo.fcc.gov/api/census/area',
+                     params={'format':'json', 'lat':lat, 'lon': lon})
+    fcc_data = r.json()['results'][0]
+    state_fips = fcc_data['state_fips']
+
+    counties = get_county_data(state_fips)
+    counties_near = find_near(counties, lat, lon, 1)
+    county_here = find_here(counties_near, lat, lon)
+    
+    places = get_place_data(state_fips)
+    places_near = find_near(places, lat, lon, 0.1)
+    place_here = find_here(places_near, lat, lon)
+    
+    data = {}
+    if len(county_here.index) > 0:
+        here = county_here.iloc[0]
+        data['county'] = data_json(here)
+        # tracts need county filter to download without crashing
+        tracts = get_tract_data(state_fips, county=here.COUNTY)
+        tracts_near = find_near(tracts, lat, lon, 0.05)
+        tract_here = find_here(tracts_near, lat, lon)
+        if len(tract_here.index) > 0:
+            data['tract'] = data_json(tract_here.iloc[0])
+        
+    if len(place_here.index) > 0:
+        data['place'] = data_json(place_here.iloc[0])
 
     return data
 
