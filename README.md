@@ -1,3 +1,6 @@
 ### Prereqs
-- install sassc
-- install node+npm
+- python3
+- pip
+- flask
+- sassc https://github.com/sass/sassc
+- node+npm
