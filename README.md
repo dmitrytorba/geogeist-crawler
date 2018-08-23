@@ -1,6 +1,12 @@
 ### Prereqs
 - python3
 - pip
-- flask
+- venv
 - sassc https://github.com/sass/sassc
 - node+npm
+
+### Install
+make install
+
+### Run
+make run

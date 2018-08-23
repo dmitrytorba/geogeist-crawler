@@ -18,6 +18,9 @@ run: build
 install:
 	mkdir -p static
 	npm install
+	python3 -m venv venv
+	. venv/bin/activate
+	pip install -r requirements.txt
 
 clean:
 	rm -f static/main.js

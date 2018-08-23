@@ -3,3 +3,4 @@ node_modules
 *pkl
 static/main.js
 static/main.css
+venv
