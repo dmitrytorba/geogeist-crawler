@@ -1,6 +1,5 @@
 node_modules
 *pyc
 *pkl
-static/main.js
-static/main.css
+static/*
 venv

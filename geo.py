@@ -66,7 +66,6 @@ def get_place_data(state_fips):
     return d
 
 def get_tract_data(state_fips, county):
-    cols = ['NAME', 'H0030001','H0030002','H0030003']
     data = cached_query(state_fips, 'tract', cols=get_cols())
     geodata = cached_query(state_fips, 'tract', is_map=True, county=county)
     
@@ -118,16 +117,19 @@ def data_json(here):
             'name': here.BASENAME,
             'population': {
                 'total': here.POP100,
+                'total-male': here.P0120002,
+                'total-female': here.P0120026,
                 'male': {
-                    'total': here.P0120002,
-                    'under-5': here.P0120003,
-                    '5-9': here.P0120004,
+                    ' 0-5': here.P0120003,
+                    ' 5-9': here.P0120004,
                     '10-14': here.P0120005,
-                    '15-17': here.P0120006,
-                    '18-19': here.P0120007,
-                    '20': here.P0120008,
-                    '21': here.P0120009,
-                    '22-24': here.P0120010,
+                    '15-19': here.P0120006 + here.P0120007,
+                    #'15-17': here.P0120006,
+                    #'18-19': here.P0120007,
+                    '20-24': here.P0120008 + here.P0120009 + here.P0120010,
+                    #'20': here.P0120008,
+                    #'21': here.P0120009,
+                    #'22-24': here.P0120010,
                     '25-29': here.P0120011,
                     '30-34': here.P0120012,
                     '35-39': here.P0120013,
@@ -135,25 +137,28 @@ def data_json(here):
                     '45-49': here.P0120015,
                     '50-54': here.P0120016,
                     '55-59': here.P0120017,
-                    '60-61': here.P0120018,
-                    '62-64': here.P0120019,
-                    '65-66': here.P0120020,
-                    '67-69': here.P0120021,
+                    '60-64': here.P0120018 + here.P0120019,
+                    #'60-61': here.P0120018,
+                    #'62-64': here.P0120019,
+                    '65-69': here.P0120020 + here.P0120021,
+                    #'65-66': here.P0120020,
+                    #'67-69': here.P0120021,
                     '70-74': here.P0120022,
                     '75-79': here.P0120023,
                     '80-84': here.P0120024,
                     '85+': here.P0120025,
                 },
                 'female': {
-                    'total': here.P0120026,
-                    'under-5': here.P0120027,
-                    '5-9': here.P0120028,
+                    ' 0-5': here.P0120027,
+                    ' 5-9': here.P0120028,
                     '10-14': here.P0120029,
-                    '15-17': here.P0120030,
-                    '18-19': here.P0120031,
-                    '20': here.P0120032,
-                    '21': here.P0120033,
-                    '22-24': here.P0120034,
+                    '15-19': here.P0120030 + here.P0120031,
+                    #'15-17': here.P0120030,
+                    #'18-19': here.P0120031,
+                    '20-24': here.P0120032 + here.P0120033 + here.P0120034,
+                    #'20': here.P0120032,
+                    #'21': here.P0120033,
+                    #'22-24': here.P0120034,
                     '25-29': here.P0120035,
                     '30-34': here.P0120036,
                     '35-39': here.P0120037,
@@ -161,10 +166,12 @@ def data_json(here):
                     '45-49': here.P0120039,
                     '50-54': here.P0120040,
                     '55-59': here.P0120041,
-                    '60-61': here.P0120042,
-                    '62-64': here.P0120043,
-                    '65-66': here.P0120044,
-                    '67-69': here.P0120045,
+                    '60-64': here.P0120042 + here.P0120043,
+                    #'60-61': here.P0120042,
+                    #'62-64': here.P0120043,
+                    '65-69': here.P0120044 + here.P0120045,
+                    #'65-66': here.P0120044,
+                    #'67-69': here.P0120045,
                     '70-74': here.P0120046,
                     '75-79': here.P0120047,
                     '80-84': here.P0120048,
@@ -235,18 +242,34 @@ def get_data(lat, lon):
     if len(county_here.index) > 0:
         here = county_here.iloc[0]
         data['county'] = data_json(here)
+        draw_chart(data, 'county', here.COUNTY, state_fips)
         # tracts need county filter to download without crashing
         tracts = get_tract_data(state_fips, county=here.COUNTY)
         tracts_near = find_near(tracts, lat, lon, 0.05)
         tract_here = find_here(tracts_near, lat, lon)
         if len(tract_here.index) > 0:
-            data['tract'] = data_json(tract_here.iloc[0])
+            here = tract_here.iloc[0]
+            data['tract'] = data_json(here)
+            draw_chart(data, 'tract', here.tract, state_fips)
         
     if len(place_here.index) > 0:
-        data['place'] = data_json(place_here.iloc[0])
+        here = place_here.iloc[0]
+        data['place'] = data_json(here)
+        draw_chart(data, 'place', here.place, state_fips)
 
     return data
 
+def draw_chart(data, res, code, state_fips):
+    data = data[res]
+    path = "static/population_" + state_fips + "_" + res + "_" + code + ".png"
+    male_pop = data['population']['male']
+    female_pop = data['population']['female']
+    df = pd.DataFrame({'Male': male_pop, 'Female': female_pop})
+    plot = df.plot(kind='bar')
+    fig = plot.get_figure()
+    fig.savefig(path)
+    data['population']['chart'] = path
+  
 if __name__ == "__main__":
     # CDP Polygon 
     #lat = 38.6950677
