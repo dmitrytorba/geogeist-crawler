@@ -24,7 +24,8 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
         if is_map:
             layers = {
                 'county': 100,
-                'place': 36,
+                'incorp': 34,
+                'cdp': 36,
                 'tract': 14
                 }
             w = 'STATE=' + state_fips
@@ -54,8 +55,9 @@ def get_cols():
 
 def get_place_data(state_fips):
     data = cached_query(state_fips, 'place', cols=get_cols())
-    geodata = cached_query(state_fips, 'place', is_map=True)
-    
+    geodata = cached_query(state_fips, 'cdp', is_map=True)
+    geodata = geodata.append(cached_query(state_fips, 'incorp', is_map=True))
+
     d = pd.merge(data, geodata, left_on='place', right_on='PLACE', how='outer')
 
     # find only non-NaN entries (are the NaNs bugs??)
