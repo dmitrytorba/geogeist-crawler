@@ -5,6 +5,7 @@ function censusTileHtml(conf) {
         <div class="content">
          <p class="title">${conf.title}</p>
          <p class="subtitle">Population: ${conf.population}</p>
+         <div class="population-chart">Population Chart</div>
          <p class="subtitle">Houses: ${conf.houses}</p>
         </div>
       </article>
@@ -43,7 +44,8 @@ function renderCounty(data) {
 	'population': data.county.population.total,
 	'houses': data.county.houses
     })
-    $(".tile-area").append(html)
+    var $tile = $('.tile-area').append(html)
+    d3.select($('.population-chart', tile).get(0))
 }
 
 function renderPlace(data) {

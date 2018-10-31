@@ -247,10 +247,10 @@ def get_data(lat, lon):
 
 if __name__ == "__main__":
     # CDP Polygon 
-    lat = 38.6950677
-    lon = -121.2273321
+    #lat = 38.6950677
+    #lon = -121.2273321
     # Incorporated Polygon with holes 
-    #lat=38.7937531
-    #lon=-121.2420338
+    lat=38.7937531
+    lon=-121.2420338
     print(get_data(lat,lon))
     #print(get_tract_data('06'))
