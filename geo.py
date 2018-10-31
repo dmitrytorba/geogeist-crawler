@@ -270,6 +270,7 @@ def draw_chart(data, res, code, state_fips):
     plot = df.plot(kind='bar')
     fig = plot.get_figure()
     fig.savefig(path)
+    matplotlib.pyplot.close('all')
     data['population']['chart'] = path
   
 if __name__ == "__main__":
