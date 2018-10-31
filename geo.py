@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import cenpy as c
 import pandas as pd
 import cenpy.tiger as tiger
