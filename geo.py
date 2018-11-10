@@ -224,8 +224,6 @@ def data_json(here):
                 'migrants': here.H0050007,
             }
         }
-
-
 def get_data(lat, lon):
     r = requests.get('https://geo.fcc.gov/api/census/area',
                      params={'format':'json', 'lat':lat, 'lon': lon})
@@ -268,21 +266,27 @@ def draw_chart(data, res, code, state_fips):
     male_pop = data['population']['male']
     female_pop = data['population']['female']
     df = pd.DataFrame({'Male': male_pop, 'Female': female_pop})
-    plot = df.plot(kind='bar')
+    plot = df.plot(kind='bar', title='Population Age and Gender')
     fig = plot.get_figure()
     fig.savefig(path)
     data['population']['chart'] = path
 
-    path = "static/race_" + state_fips + "_" + res + "_" + code + ".png"
- 
     occupied = data['occupied']
-    df = pd.DataFrame({ 'Householders': occupied['races'] })
-    #total = df.sum()
-    #df = (df/total)*100
-    plot = df.plot.pie(y=0, labels=None)
+
+    path = "static/race_" + state_fips + "_" + res + "_" + code + ".png"
+    df = pd.DataFrame({ '': occupied['races'] })
+    plot = df.plot.pie(y=0, labels=None, title='Householders', autopct='%1.0f%%')
     fig = plot.get_figure()
     fig.savefig(path)
-    data['occupied']['races']['chart'] = path
+    occupied['races']['chart'] = path
+
+    path = "static/household_size_" + state_fips + "_" + res + "_" + code + ".png"
+    df = pd.DataFrame({ '': occupied['household-size-houses'] })
+    plot = df.plot(kind='bar', title='Household Size', legend=None)
+
+    fig = plot.get_figure()
+    fig.savefig(path)
+    occupied['household_chart'] = path
 
     matplotlib.pyplot.close('all')
   
