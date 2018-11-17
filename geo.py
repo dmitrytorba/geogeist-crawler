@@ -186,17 +186,18 @@ def data_json(here):
                     'houses': here.H0030003,
                     'people': here.H0110001
                 },
-                'mortgage': {
-                    'houses': here.H0040002,
-                    'people': here.H0110002
-                },
-                'free-clear': {
-                    'houses': here.H0040003,
-                    'people': here.H0110003
-                },
-                'renters': {
-                    'houses': here.H0040004,
-                    'people': here.H0110004
+                'finance': {
+                    'people': {
+                        'mortgage': here.H0110002,
+                        'free-and-clear': here.H0110003,
+                        'renting': here.H0110004
+
+                    }, 
+                    'houses': {
+                        'mortgage': here.H0040002,
+                        'free-and-clear': here.H0040003,
+                        'renting': here.H0040004
+                    } 
                 },
                 'races': {
                     'white': here.H0060002,
@@ -283,10 +284,16 @@ def draw_chart(data, res, code, state_fips):
     path = "static/household_size_" + state_fips + "_" + res + "_" + code + ".png"
     df = pd.DataFrame({ '': occupied['household-size-houses'] })
     plot = df.plot(kind='bar', title='Household Size', legend=None)
-
     fig = plot.get_figure()
     fig.savefig(path)
     occupied['household_chart'] = path
+
+    path = "static/finance_" + state_fips + "_" + res + "_" + code + ".png"
+    df = pd.DataFrame({ '': occupied['finance']['houses'] })
+    plot = df.plot.pie(y=0, labels=None, title='Home Ownership', autopct='%1.0f%%')
+    fig = plot.get_figure()
+    fig.savefig(path)
+    occupied['finance_chart'] = path
 
     matplotlib.pyplot.close('all')
   
