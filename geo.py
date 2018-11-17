@@ -279,7 +279,7 @@ def draw_chart(data, res, code, state_fips):
     plot = df.plot.pie(y=0, labels=None, title='Householders', autopct='%1.0f%%')
     fig = plot.get_figure()
     fig.savefig(path)
-    occupied['races']['chart'] = path
+    occupied['race_chart'] = path
 
     path = "static/household_size_" + state_fips + "_" + res + "_" + code + ".png"
     df = pd.DataFrame({ '': occupied['household-size-houses'] })
