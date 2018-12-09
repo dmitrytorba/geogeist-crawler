@@ -226,6 +226,7 @@ def data_json(here):
             }
         }
 def get_data(lat, lon):
+    print('get data: ' + lat + ', ' + lon)
     r = requests.get('https://geo.fcc.gov/api/census/area',
                      params={'format':'json', 'lat':lat, 'lon': lon})
     fcc_data = r.json()['results'][0]
@@ -291,7 +292,7 @@ def draw_chart(data, res, code, state_fips):
     path = "static/finance_" + state_fips + "_" + res + "_" + code + ".png"
     df = pd.DataFrame({ '': occupied['finance']['houses'] })
     plot = df.plot.pie(y=0, labels=None, title='Home Ownership', autopct='%1.0f%%')
-    fig = plot.get_figure()
+    fig = plot.get_figure()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
     fig.savefig(path)
     occupied['finance_chart'] = path
 
