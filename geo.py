@@ -226,7 +226,7 @@ def data_json(here):
             }
         }
 def get_data(lat, lon):
-    print('get data: ' + lat + ', ' + lon)
+    print('get data: ' + str(lat) + ', ' + str(lon))
     r = requests.get('https://geo.fcc.gov/api/census/area',
                      params={'format':'json', 'lat':lat, 'lon': lon})
     fcc_data = r.json()['results'][0]
