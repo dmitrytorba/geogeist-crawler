@@ -267,8 +267,7 @@ def draw_chart(data, res, code, state_fips):
     path = "static/population_" + state_fips + "_" + res + "_" + code + ".png"
     male_pop = data['population']['male']
     female_pop = data['population']['female']
-    df = pd.DataFrame({'Male': male_pop, 'Female': female_pop})
-    df=df.astype(int)
+    df = pd.DataFrame({'Male': male_pop, 'Female': female_pop}).astype(int)
     plot = df.plot(kind='bar', title='Population Age and Gender')
     fig = plot.get_figure()
     fig.savefig(path)
@@ -284,14 +283,14 @@ def draw_chart(data, res, code, state_fips):
     occupied['race_chart'] = path
 
     path = "static/household_size_" + state_fips + "_" + res + "_" + code + ".png"
-    df = pd.DataFrame({ '': occupied['household-size-houses'] })
+    df = pd.DataFrame({ '': occupied['household-size-houses'] }).astype(int)
     plot = df.plot(kind='bar', title='Household Size', legend=None)
     fig = plot.get_figure()
     fig.savefig(path)
     occupied['household_chart'] = path
 
     path = "static/finance_" + state_fips + "_" + res + "_" + code + ".png"
-    df = pd.DataFrame({ '': occupied['finance']['houses'] })
+    df = pd.DataFrame({ '': occupied['finance']['houses'] }).astype(int)
     plot = df.plot.pie(y=0, labels=None, title='Home Ownership', autopct='%1.0f%%')
     fig = plot.get_figure()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
     fig.savefig(path)
