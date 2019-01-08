@@ -2,11 +2,13 @@ from flask import Flask, render_template, request
 import geo
 import json
 import numpy
+
 app = Flask(__name__)
 
 @app.route('/')
 def main_page():
-    return render_template('main.tpl')
+    return "TEST"
+    #return render_template('main.tpl')
 
 @app.route('/static/<path:path>')
 def send_static(path):

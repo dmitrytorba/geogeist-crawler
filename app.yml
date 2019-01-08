@@ -1,4 +1,0 @@
-runtime: python37
-libraries:
-- name: numpy
-- name: scipy

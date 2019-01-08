@@ -263,6 +263,7 @@ def get_data(lat, lon):
 
 def draw_chart(data, res, code, state_fips):
     data = data[res]
+    print(data)
 
     path = "static/population_" + state_fips + "_" + res + "_" + code + ".png"
     male_pop = data['population']['male']
