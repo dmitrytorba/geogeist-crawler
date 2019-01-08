@@ -268,7 +268,7 @@ def draw_chart(data, res, code, state_fips):
     male_pop = data['population']['male']
     female_pop = data['population']['female']
     df = pd.DataFrame({'Male': male_pop, 'Female': female_pop})
-    df=df.astype(float)
+    #df=df.astype(float)
     plot = df.plot(kind='bar', title='Population Age and Gender')
     fig = plot.get_figure()
     fig.savefig(path)
