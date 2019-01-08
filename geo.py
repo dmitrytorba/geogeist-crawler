@@ -263,12 +263,12 @@ def get_data(lat, lon):
 
 def draw_chart(data, res, code, state_fips):
     data = data[res]
-    print(data)
 
     path = "static/population_" + state_fips + "_" + res + "_" + code + ".png"
     male_pop = data['population']['male']
     female_pop = data['population']['female']
     df = pd.DataFrame({'Male': male_pop, 'Female': female_pop})
+    print(df)
     plot = df.plot(kind='bar', title='Population Age and Gender')
     fig = plot.get_figure()
     fig.savefig(path)
