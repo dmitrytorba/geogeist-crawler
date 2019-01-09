@@ -25,4 +25,5 @@ install:
 clean:
 	rm -f static/main.js
 	rm -f static/main.css
+	rm -f static/*.png
 	rm -f ./*.pkl
