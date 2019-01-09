@@ -19,7 +19,7 @@ install:
 	mkdir -p static
 	npm install
 	python3 -m venv venv
-	source venv/bin/activate
+	. venv/bin/activate
 	pip install -r requirements.txt
 
 clean:
