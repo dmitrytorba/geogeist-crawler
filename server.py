@@ -7,8 +7,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def main_page():
-    return "TEST"
-    #return render_template('main.tpl')
+    return render_template('main.tpl')
 
 @app.route('/static/<path:path>')
 def send_static(path):
