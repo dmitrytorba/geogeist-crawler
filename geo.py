@@ -229,6 +229,7 @@ def get_data(lat, lon):
     print('get data: ' + str(lat) + ', ' + str(lon))
     r = requests.get('https://geo.fcc.gov/api/census/area',
                      params={'format':'json', 'lat':lat, 'lon': lon})
+    print(r.json())
     fcc_data = r.json()['results'][0]
     state_fips = fcc_data['state_fips']
 
