@@ -233,6 +233,7 @@ def get_data(lat, lon):
         fcc_data = r.json()['results'][0]
         state_fips = fcc_data['state_fips']
     else:
+        print('geo.fcc.gov error')
         state_fips = '06'
 
     counties = get_county_data(state_fips)
