@@ -31,7 +31,7 @@ def insert_counties():
 
 def get_county():
 	cur = conn.cursor()
-	cur.execute("SELECT c.name WHERE ST_Covers(c.geog, 'SRID=4326;POINT(-121.2273314 38.6950877)'::geography) FROM counties c")
+	cur.execute("SELECT c.name FROM counties c WHERE ST_Covers(c.geog, 'SRID=4326;POINT(-121.2273314 38.6950877)'::geography)")
 	print(cur.fetchone())
 	conn.commit()
 	cur.close()
