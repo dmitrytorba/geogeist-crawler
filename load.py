@@ -1,11 +1,12 @@
 import geo
 import psycopg2
 import json
+import cenpy
 
 conn = psycopg2.connect(user='geogeist', password='password',
                         host='localhost', port='5432')
 
-def insert_counties():
+def load_counties():
 	state_fips = '06'
 	dt = geo.get_county_data(state_fips)
 
@@ -29,13 +30,23 @@ def insert_counties():
 	conn.commit()
 	cur.close()
 
-def get_county():
+def load_states():
+	conn = cenpy.base.Connection('CBP2012')
+	conn.set_mapservice('State_County')
+
+	for i in range(1, 3): 
+		geodata = conn.mapservice.query(layer=0, where='STATE=' + str(i))
+		print(geodata.BASENAME)
+		print(geodata.geometry)
+
+
+def test_county():
 	cur = conn.cursor()
 	cur.execute("SELECT c.name FROM counties c WHERE ST_Covers(c.geog, 'SRID=4326;POINT(-121.2273314 38.6950877)'::geography)")
 	print(cur.fetchone())
 	conn.commit()
 	cur.close()
 
-get_county()
+load_states()
 
 conn.close()
