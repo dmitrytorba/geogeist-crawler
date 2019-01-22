@@ -27,3 +27,6 @@ clean:
 	rm -f static/main.css
 	rm -f static/*.png
 	rm -f ./*.pkl
+
+db:
+	psql "sslmode=disable user=postgres host=localhost" -f schema.sql

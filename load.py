@@ -47,6 +47,6 @@ def test_county():
 	conn.commit()
 	cur.close()
 
-load_states()
+load_counties()
 
 conn.close()
