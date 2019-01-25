@@ -2,9 +2,17 @@ import geo
 import psycopg2
 import json
 import cenpy
+import us
 
 conn = psycopg2.connect(user='geogeist', password='password',
                         host='localhost', port='5432')
+
+geo_info = {
+	"type": "name",
+	"properties": {
+		"name": "EPSG:3857"
+	}
+}
 
 def load_counties():
 	state_fips = '06'
@@ -14,31 +22,30 @@ def load_counties():
 
 	for index, row in dt.iterrows():
 		geog = row.geometry.__geo_interface__
-
-
-		geog["crs"] = {
-			"type": "name",
-			"properties": {
-				"name": "EPSG:3857"
-			}
-		}
+		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
 		cur.execute("INSERT into counties (state, name, geog) VALUES (%s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))",
 			(state_fips, row.BASENAME, geog))
-	#cur.execute("SELECT ")
 
 	conn.commit()
 	cur.close()
 
 def load_states():
-	conn = cenpy.base.Connection('CBP2012')
-	conn.set_mapservice('State_County')
-
-	for i in range(1, 3): 
-		geodata = conn.mapservice.query(layer=0, where='STATE=' + str(i))
+	gov = cenpy.base.Connection('CBP2012')
+	gov.set_mapservice('State_County')
+	
+	cur = conn.cursor()
+	for state in us.states.STATES:
+		geodata = gov.mapservice.query(layer=0, where='STATE=' + state.fips).iloc[0]
+		geog = geodata.geometry.__geo_interface__
+		geog["crs"] = geo_info 
+		geog = json.dumps(geog)
 		print(geodata.BASENAME)
-		print(geodata.geometry)
+		cur.execute("INSERT into states (state, name, arealand, areawater, geog) VALUES (%s, %s, %s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))",
+			(geodata.STATE, geodata.BASENAME, int(geodata.AREALAND), int(geodata.AREAWATER), geog))
 
+	conn.commit()
+	cur.close()
 
 def test_county():
 	cur = conn.cursor()
@@ -47,6 +54,7 @@ def test_county():
 	conn.commit()
 	cur.close()
 
+load_states()
 load_counties()
 
 conn.close()

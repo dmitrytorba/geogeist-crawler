@@ -3,9 +3,9 @@ CREATE DATABASE geogeist;
 \c geogeist;
 CREATE EXTENSION postgis;
 	
-#CREATE EXTENSION postgis_topology;
-#CREATE EXTENSION fuzzystrmatch;
-#CREATE EXTENSION postgis_tiger_geocoder;
+--CREATE EXTENSION postgis_topology;
+--CREATE EXTENSION fuzzystrmatch;
+--CREATE EXTENSION postgis_tiger_geocoder;
 
 do $$ begin
    if not exists
@@ -14,6 +14,19 @@ do $$ begin
           grant all on database geogeist to geogeist;   
        end if;
 end $$;
+
+create table if not exists states 
+(
+	gid serial primary key, 
+	state text, 
+	name text, 
+	arealand bigint,
+	areawater bigint,
+	geog geography(MULTIPOLYGON)
+);
+
+grant all privileges on table states to geogeist;
+grant usage, select on sequence states_gid_seq to geogeist;
 
 create table if not exists counties
 (
