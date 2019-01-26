@@ -3,6 +3,7 @@ import psycopg2
 import json
 import cenpy
 import us
+import os
 
 conn = psycopg2.connect(user='geogeist', password='password',
                         host='localhost', port='5432')
@@ -21,11 +22,27 @@ def load_counties():
 	cur = conn.cursor()
 
 	for index, row in dt.iterrows():
+		print(row.BASENAME)
 		geog = row.geometry.__geo_interface__
 		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
-		cur.execute("INSERT into counties (state, name, geog) VALUES (%s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))",
-			(state_fips, row.BASENAME, geog))
+		data_json = { 'county': geo.data_json(row) }
+		geo.draw_chart(data_json, 'county', row.BASENAME, state_fips)
+		f = open(data_json['county']['population']['chart'], 'rb')
+		population_chart = f.read()
+		f.close()
+		f = open(data_json['county']['occupied']['race_chart'], 'rb')
+		race_chart = f.read()
+		f.close()
+		f = open(data_json['county']['occupied']['finance_chart'], 'rb')
+		finance_chart = f.read()
+		f.close()
+		f = open(data_json['county']['occupied']['household_chart'], 'rb')
+		household_chart = f.read()
+		f.close()
+		query = "INSERT into counties (state, name, data, population_chart, race_chart, finance_chart, household_chart, geog)" + " VALUES (%s, %s, %s, %s, %s, %s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))"
+		values = (state_fips, row.BASENAME, json.dumps(data_json), population_chart, race_chart, finance_chart, household_chart, geog)
+		cur.execute(query, values)
 
 	conn.commit()
 	cur.close()
@@ -54,7 +71,7 @@ def test_county():
 	conn.commit()
 	cur.close()
 
-load_states()
+
 load_counties()
 
 conn.close()

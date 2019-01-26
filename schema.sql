@@ -32,7 +32,12 @@ create table if not exists counties
 (
 	gid serial primary key, 
 	state text, 
-	name text, 
+	name text,
+	data json, 
+	population_chart bytea,
+	race_chart bytea,
+	finance_chart bytea,
+	household_chart bytea,
 	geog geography(MULTIPOLYGON)
 );
 
