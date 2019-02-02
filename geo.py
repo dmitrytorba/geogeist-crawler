@@ -9,7 +9,7 @@ import pysal
 import math
 import pyproj
 
-conn = c.base.Connection('DecennialSF12010')
+conn = c.base.Connection('DECENNIALSF12010')
 conn.set_mapservice('tigerWMS_Census2010')
 
 def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
