@@ -36,8 +36,8 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
             data = conn.mapservice.query(layer=layers[geo_unit], where=w)
         else:
             g_filter = { 'state': state_fips }
-            #if geo_unit == 'tract':
-            #    g_filter['county'] = county
+            if geo_unit == 'tract':
+                g_filter['county'] = county
             data = conn.query(cols,
                               geo_unit = geo_unit + ':*',
                               geo_filter = g_filter)
@@ -45,13 +45,13 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
     return data
 
 def get_cols():
-    population_age = conn.varslike('P01200[01234][0-9]', engine='fnmatch')
-    races = conn.varslike('H006000[2-8]', engine='fnmatch')
-    household = conn.varslike('H013000[2-8]', engine='fnmatch')
-    other_vars = ['NAME','H0030001','H0030002','H0030003',
-                  'H0040002','H0040003','H0040004',
-                  'H0110001','H0110002','H0110003','H0110004',
-                  'H0050006','H0050007', 'H0070001']
+    population_age = conn.varslike('P0120[01234][0-9]', engine='fnmatch')
+    races = conn.varslike('H00600[2-8]', engine='fnmatch')
+    household = conn.varslike('H01300[2-8]', engine='fnmatch')
+    other_vars = ['LSAD_NAME','H003001','H003002','H003003',
+                  'H004002','H004003','H004004',
+                  'H011001','H011002','H011003','H011004',
+                  'H005006','H005007', 'H007001', 'P001001']
     cols = population_age + races + household + other_vars
     return cols
 
@@ -114,97 +114,98 @@ def find_here(near, lat, lon):
 
     return here
 
+# https://api.census.gov/data/2010/dec/sf1/variables.html
 def data_json(here):
     return {
-            'name': here.BASENAME,
+            'name': here.LSAD_NAME,
             'population': {
-                'total': here.POP100,
-                'total-male': here.P0120002,
-                'total-female': here.P0120026,
+                'total': here.P001001,
+                'total-male': here.P012002,
+                'total-female': here.P012026,
                 'male': {
-                    ' 0-5': here.P0120003,
-                    ' 5-9': here.P0120004,
-                    '10-14': here.P0120005,
-                    '15-19': int(here.P0120006) + int(here.P0120007),
-                    '20-24': int(here.P0120008) + int(here.P0120009) + int(here.P0120010),
-                    '25-29': here.P0120011,
-                    '30-34': here.P0120012,
-                    '35-39': here.P0120013,
-                    '40-44': here.P0120014,
-                    '45-49': here.P0120015,
-                    '50-54': here.P0120016,
-                    '55-59': here.P0120017,
-                    '60-64': int(here.P0120018) + int(here.P0120019),
-                    '65-69': int(here.P0120020) + int(here.P0120021),
-                    '70-74': here.P0120022,
-                    '75-79': here.P0120023,
-                    '80-84': here.P0120024,
-                    '85+': here.P0120025,
+                    ' 0-5': here.P012003,
+                    ' 5-9': here.P012004,
+                    '10-14': here.P012005,
+                    '15-19': int(here.P012006) + int(here.P012007),
+                    '20-24': int(here.P012008) + int(here.P012009) + int(here.P012010),
+                    '25-29': here.P012011,
+                    '30-34': here.P012012,
+                    '35-39': here.P012013,
+                    '40-44': here.P012014,
+                    '45-49': here.P012015,
+                    '50-54': here.P012016,
+                    '55-59': here.P012017,
+                    '60-64': int(here.P012018) + int(here.P012019),
+                    '65-69': int(here.P012020) + int(here.P012021),
+                    '70-74': here.P012022,
+                    '75-79': here.P012023,
+                    '80-84': here.P012024,
+                    '85+': here.P012025,
                 },
                 'female': {
-                    ' 0-5': here.P0120027,
-                    ' 5-9': here.P0120028,
-                    '10-14': here.P0120029,
-                    '15-19': int(here.P0120030) + int(here.P0120031),
-                    '20-24': int(here.P0120032) + int(here.P0120033) + int(here.P0120034),
-                    '25-29': here.P0120035,
-                    '30-34': here.P0120036,
-                    '35-39': here.P0120037,
-                    '40-44': here.P0120038,
-                    '45-49': here.P0120039,
-                    '50-54': here.P0120040,
-                    '55-59': here.P0120041,
-                    '60-64': int(here.P0120042) + int(here.P0120043),
-                    '65-69': int(here.P0120044) + int(here.P0120045),
-                    '70-74': here.P0120046,
-                    '75-79': here.P0120047,
-                    '80-84': here.P0120048,
-                    '85+': here.P0120049,
+                    ' 0-5': here.P012027,
+                    ' 5-9': here.P012028,
+                    '10-14': here.P012029,
+                    '15-19': int(here.P012030) + int(here.P012031),
+                    '20-24': int(here.P012032) + int(here.P012033) + int(here.P012034),
+                    '25-29': here.P012035,
+                    '30-34': here.P012036,
+                    '35-39': here.P012037,
+                    '40-44': here.P012038,
+                    '45-49': here.P012039,
+                    '50-54': here.P012040,
+                    '55-59': here.P012041,
+                    '60-64': int(here.P012042) + int(here.P012043),
+                    '65-69': int(here.P012044) + int(here.P012045),
+                    '70-74': here.P012046,
+                    '75-79': here.P012047,
+                    '80-84': here.P012048,
+                    '85+': here.P012049,
                 },
             }, 
-            'houses': here.H0030001,
+            'houses': here.H003001,
             'occupied': {
                 'total': {
-                    'houses': here.H0030003,
-                    'people': here.H0110001
+                    'houses': here.H003003,
+                    'people': here.H011001
                 },
                 'finance': {
                     'people': {
-                        'mortgage': here.H0110002,
-                        'free-and-clear': here.H0110003,
-                        'renting': here.H0110004
+                        'mortgage': here.H011002,
+                        'free-and-clear': here.H011003,
+                        'renting': here.H011004
 
                     }, 
                     'houses': {
-                        'mortgage': here.H0040002,
-                        'free-and-clear': here.H0040003,
-                        'renting': here.H0040004
+                        'mortgage': here.H004002,
+                        'free-and-clear': here.H004003,
+                        'renting': here.H004004
                     } 
                 },
                 'races': {
-                    'white': here.H0060002,
-                    'black': here.H0060003,
-                    'asian': here.H0060004,
-                    'islander': here.H0060005,
-                    'native': here.H0060006,
-                    'other': here.H0060007,
-                    'mixed': here.H0060008,
-                    'hispanic': here.H0070001,
+                    'white': here.H006002,
+                    'black': here.H006003,
+                    'asian': here.H006004,
+                    'islander': here.H006005,
+                    'native': here.H006006,
+                    'other': here.H006007,
+                    'mixed': here.H006008,
+                    'hispanic': here.H007001,
                 },
                 'household-size-houses': {
-                    '1': here.H0130002,
-                    '2': here.H0130003,
-                    '3': here.H0130004,
-                    '4': here.H0130005,
-                    '5': here.H0130006,
-                    '6': here.H0130007,
-                    '7+': here.H0130008,
+                    '1': here.H013002,
+                    '2': here.H013003,
+                    '3': here.H013004,
+                    '4': here.H013005,
+                    '5': here.H013006,
+                    '6': here.H013007,
+                    '7+': here.H013008,
                 }
             },
             'vacant': {
-                'total': here.H0030002,
-                'seasonal': here.H0050006,
-                'migrants': here.H0050007,
+                'total': here.H003002,
+                'seasonal': here.H005006,
+                'migrants': here.H005007,
             }
         }
 def get_data(lat, lon):
@@ -230,7 +231,7 @@ def get_data(lat, lon):
     if len(county_here.index) > 0:
         here = county_here.iloc[0]
         data['county'] = data_json(here)
-        draw_chart(data, 'county', here.COUNTY, state_fips)
+        draw_chart(data['county'], 'county', here.COUNTY, state_fips)
         # tracts need county filter to download without crashing
         tracts = get_tract_data(state_fips, county=here.COUNTY)
         tracts_near = find_near(tracts, lat, lon, 0.05)
@@ -238,18 +239,16 @@ def get_data(lat, lon):
         if len(tract_here.index) > 0:
             here = tract_here.iloc[0]
             data['tract'] = data_json(here)
-            draw_chart(data, 'tract', here.tract, state_fips)
+            draw_chart(data['tract'], 'tract', here.tract, state_fips)
         
     if len(place_here.index) > 0:
         here = place_here.iloc[0]
         data['place'] = data_json(here)
-        draw_chart(data, 'place', here.place, state_fips)
+        draw_chart(data['place'], 'place', here.place, state_fips)
 
     return data
 
 def draw_chart(data, res, code, state_fips):
-    data = data[res]
-
     path = "static/population_" + state_fips + "_" + res + "_" + code + ".png"
     male_pop = data['population']['male']
     female_pop = data['population']['female']
