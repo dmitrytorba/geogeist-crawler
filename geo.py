@@ -41,6 +41,7 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
             data = conn.query(cols,
                               geo_unit = geo_unit + ':*',
                               geo_filter = g_filter)
+    data.fillna(0)
     data.to_pickle(file_name)
     return data
 
@@ -68,7 +69,7 @@ def get_place_data(state_fips):
     return d
 
 def get_tract_data(state_fips, county):
-    data = cached_query(state_fips, 'tract', cols=get_cols())
+    data = cached_query(state_fips, 'tract', cols=get_cols(), county=county)
     geodata = cached_query(state_fips, 'tract', is_map=True, county=county)
     
     d = pd.merge(data, geodata, left_on='tract', right_on='TRACT', how='outer')
