@@ -10,3 +10,6 @@ make install
 
 ### Run
 make run
+
+### Notes
+inspired by: https://github.com/sunlightlabs/sitegeist

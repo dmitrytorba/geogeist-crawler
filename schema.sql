@@ -20,8 +20,11 @@ create table if not exists states
 	gid serial primary key, 
 	state text, 
 	name text, 
-	arealand bigint,
-	areawater bigint,
+	data json, 
+	population_chart bytea,
+	race_chart bytea,
+	finance_chart bytea,
+	household_chart bytea,
 	geog geography(MULTIPOLYGON)
 );
 
@@ -43,3 +46,38 @@ create table if not exists counties
 
 grant all privileges on table counties to geogeist;
 grant usage, select on sequence counties_gid_seq to geogeist;
+
+create table if not exists places 
+(
+	gid serial primary key, 
+	state text, 
+	name text,
+	data json, 
+	population_chart bytea,
+	race_chart bytea,
+	finance_chart bytea,
+	household_chart bytea,
+	geog geography(MULTIPOLYGON)
+);
+
+grant all privileges on table places to geogeist;
+grant usage, select on sequence places_gid_seq to geogeist;
+
+
+
+create table if not exists tracts
+(
+	gid serial primary key, 
+	state text, 
+	county text,
+	name text,
+	data json, 
+	population_chart bytea,
+	race_chart bytea,
+	finance_chart bytea,
+	household_chart bytea,
+	geog geography(MULTIPOLYGON)
+);
+
+grant all privileges on table tracts to geogeist;
+grant usage, select on sequence tracts_gid_seq to geogeist;
