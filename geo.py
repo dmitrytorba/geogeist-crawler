@@ -41,7 +41,6 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
             data = conn.query(cols,
                               geo_unit = geo_unit + ':*',
                               geo_filter = g_filter)
-    data.fillna(0)
     data.to_pickle(file_name)
     return data
 
@@ -118,6 +117,7 @@ def find_here(near, lat, lon):
 
 # https://api.census.gov/data/2010/dec/sf1/variables.html
 def data_json(here):
+    here = here.fillna(0)
     return {
             'name': here.LSAD_NAME,
             'population': {
