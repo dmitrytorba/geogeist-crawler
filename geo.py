@@ -88,6 +88,7 @@ def get_county_data(state_fips):
     
     return d
 
+
 def find_near(d, lat, lon, how_near):
     # sort by distance to here
     lat_delta = d.CENTLAT.apply(float)-lat
