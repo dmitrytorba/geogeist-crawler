@@ -30,3 +30,6 @@ clean:
 
 db:
 	psql "sslmode=disable user=postgres host=localhost" -f schema.sql
+
+upload:
+	gsutil rsync -d static gs://geogeist-227901.appspot.com/static
