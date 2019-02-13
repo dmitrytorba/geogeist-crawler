@@ -113,10 +113,9 @@ def load_states():
 
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'state', row.BASENAME, row.STATE)
-		population_chart, race_chart, finance_chart, household_chart = read_charts(data_json)
 
-		query = "INSERT into states (state, name, data, population_chart, race_chart, finance_chart, household_chart, geog)" + " VALUES (%s, %s, %s, %s, %s, %s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))"
-		values = (row.STATE, row.BASENAME, json.dumps(data_json), population_chart, race_chart, finance_chart, household_chart, geog)
+		query = "INSERT into states (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
+		values = (row.STATE, row.BASENAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
 
 	conn.commit()

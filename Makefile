@@ -18,6 +18,8 @@ run: build
 install:
 	mkdir -p static
 	npm install
+	sudo apt install python3 python3-pip python3-venv
+	python3 -m pip install --user virtualenv
 	python3 -m venv venv
 	. venv/bin/activate
 	pip install -r requirements.txt
