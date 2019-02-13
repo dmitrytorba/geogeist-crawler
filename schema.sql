@@ -21,10 +21,6 @@ create table if not exists states
 	state text, 
 	name text, 
 	data json, 
-	population_chart bytea,
-	race_chart bytea,
-	finance_chart bytea,
-	household_chart bytea,
 	geog geography(MULTIPOLYGON)
 );
 
@@ -37,10 +33,6 @@ create table if not exists counties
 	state text, 
 	name text,
 	data json, 
-	population_chart bytea,
-	race_chart bytea,
-	finance_chart bytea,
-	household_chart bytea,
 	geog geography(MULTIPOLYGON)
 );
 
@@ -53,10 +45,6 @@ create table if not exists places
 	state text, 
 	name text,
 	data json, 
-	population_chart bytea,
-	race_chart bytea,
-	finance_chart bytea,
-	household_chart bytea,
 	geog geography(MULTIPOLYGON)
 );
 
@@ -81,3 +69,5 @@ create table if not exists tracts
 
 grant all privileges on table tracts to geogeist;
 grant usage, select on sequence tracts_gid_seq to geogeist;
+
+
