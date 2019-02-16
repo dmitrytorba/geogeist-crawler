@@ -90,7 +90,7 @@ def load_counties(state_fips):
 		values = (state_fips, row.BASENAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
 		conn.commit()
-		#load_tracts(state_fips, row.COUNTY)
+		load_tracts(state_fips, row.COUNTY)
 
 
 	cur.close()
