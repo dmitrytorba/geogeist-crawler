@@ -40,7 +40,7 @@ def load_tracts(state_fips, county):
 		geog = row.geometry.__geo_interface__
 		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
-
+		
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'tract', row.TRACT, state_fips)
 
@@ -65,7 +65,7 @@ def load_places(state_fips):
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'place', row.LSAD_NAME, state_fips)
 		
-		query = "INSERT into places (state, name, data, geog)" + " VALUES (%s, %s, %s, (ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
+		query = "INSERT into places (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
 		values = (state_fips, row.LSAD_NAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
 
@@ -86,12 +86,11 @@ def load_counties(state_fips):
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'county', row.BASENAME, state_fips)
 	
-		query = "INSERT into counties (state, name, data, geog)" + " VALUES (%s, %s, %s, (ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
+		query = "INSERT into counties (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
 		values = (state_fips, row.BASENAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
 		conn.commit()
-
-		load_tracts(state_fips, row.COUNTY)
+		#load_tracts(state_fips, row.COUNTY)
 
 
 	cur.close()
@@ -131,8 +130,7 @@ def test_county():
 
 #load_states()
 #load_tracts('06', '067')
-#load_counties('06')
+load_counties('06')
 #load_places('06')
-#test_county()
 
 conn.close()
