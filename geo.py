@@ -32,8 +32,11 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
                 }
             w = 'STATE=' + state_fips
             if geo_unit == 'tract':
-               w = 'county=' + county 
-            data = conn.mapservice.query(layer=layers[geo_unit], where=w)
+               w = 'county=' + county
+            try: 
+                data = conn.mapservice.query(layer=layers[geo_unit], where=w)
+            except e:
+                print(e)
         else:
             g_filter = { 'state': state_fips }
             if geo_unit == 'tract':
