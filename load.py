@@ -16,21 +16,6 @@ geo_info = {
 	}
 }
 
-def read_charts(data_json):	
-		f = open(data_json['population']['chart'], 'rb')
-		population_chart = psycopg2.Binary(f.read())
-		f.close()
-		f = open(data_json['occupied']['race_chart'], 'rb')
-		race_chart = psycopg2.Binary(f.read())
-		f.close()
-		f = open(data_json['occupied']['finance_chart'], 'rb')
-		finance_chart = psycopg2.Binary(f.read())
-		f.close()
-		f = open(data_json['occupied']['household_chart'], 'rb')
-		household_chart = psycopg2.Binary(f.read())
-		f.close()
-		return population_chart, race_chart, finance_chart, household_chart 
-
 def load_tracts(state_fips, county):
 	print(county)
 	dt = geo.get_tract_data(state_fips, county)
@@ -86,8 +71,8 @@ def load_counties(state_fips):
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'county', row.BASENAME, state_fips)
 	
-		query = "INSERT into counties (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (state_fips, row.BASENAME, json.dumps(data_json), geog)
+		query = "INSERT into counties (state, county, name, data, geog)" + " VALUES (%s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
+		values = (state_fips, row.COUNTY, row.BASENAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
 		conn.commit()
 		load_tracts(state_fips, row.COUNTY)

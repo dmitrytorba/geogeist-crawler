@@ -38,9 +38,12 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
             g_filter = { 'state': state_fips }
             if geo_unit == 'tract':
                 g_filter['county'] = county
-            data = conn.query(cols,
-                              geo_unit = geo_unit + ':*',
-                              geo_filter = g_filter)
+            try:
+                data = conn.query(cols,
+                                  geo_unit = geo_unit + ':*',
+                                  geo_filter = g_filter)
+            except e:
+                print(e)
     data.to_pickle(file_name)
     return data
 
