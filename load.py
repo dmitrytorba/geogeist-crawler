@@ -5,6 +5,7 @@ import cenpy
 import us
 import os
 import pandas as pd
+import click
 
 conn = psycopg2.connect(user='geogeist', password='password',
                         host='localhost', port='5432')
@@ -16,9 +17,15 @@ geo_info = {
 	}
 }
 
-def load_tracts(state_fips, county):
-	print(county)
-	dt = geo.get_tract_data(state_fips, county)
+@click.group()
+def cli():
+    pass
+
+@click.command()
+@click.option('--state', help='State FIPS code')
+@click.option('--county', help='County code')
+def tracts(state, county):
+	dt = geo.get_tract_data(state, county)
 	cur = conn.cursor()
 	for index, row in dt.iterrows():
 		print(row.TRACT)
@@ -27,17 +34,19 @@ def load_tracts(state_fips, county):
 		geog = json.dumps(geog)
 		
 		data_json = geo.data_json(row)
-		geo.draw_chart(data_json, 'tract', row.TRACT, state_fips)
+		geo.draw_chart(data_json, 'tract', row.TRACT, state)
 
 		query = "INSERT into tracts (state, county, name, data, geog)" + " VALUES (%s, %s, %s, %s, (ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (state_fips, county, row.TRACT, json.dumps(data_json), geog)
+		values = (state, county, row.TRACT, json.dumps(data_json), geog)
 		cur.execute(query, values)
 
 	conn.commit()
 	cur.close()
 
-def load_places(state_fips):
-	dt = geo.get_place_data(state_fips)
+@click.command()
+@click.option('--state', help='State FIPS code')
+def places(state):
+	dt = geo.get_place_data(state)
 
 	cur = conn.cursor()
 
@@ -48,17 +57,21 @@ def load_places(state_fips):
 		geog = json.dumps(geog)
 
 		data_json = geo.data_json(row)
-		geo.draw_chart(data_json, 'place', row.LSAD_NAME, state_fips)
+		geo.draw_chart(data_json, 'place', row.LSAD_NAME, state)
 		
 		query = "INSERT into places (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (state_fips, row.LSAD_NAME, json.dumps(data_json), geog)
+		values = (state, row.LSAD_NAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
 
 	conn.commit()
 	cur.close()
 
-def load_counties(state_fips):
-	dt = geo.get_county_data(state_fips)
+@click.command()
+@click.option('--state', help='State FIPS code')
+@click.option('--load-tracts', default=False, help='Load tracts from each county')
+def counties(state, load_tracts):
+	print('Loading counties from state ' + state)
+	dt = geo.get_county_data(state)
 
 	cur = conn.cursor()
 
@@ -69,18 +82,22 @@ def load_counties(state_fips):
 		geog = json.dumps(geog)
 
 		data_json = geo.data_json(row)
-		geo.draw_chart(data_json, 'county', row.BASENAME, state_fips)
+		geo.draw_chart(data_json, 'county', row.BASENAME, state)
 	
 		query = "INSERT into counties (state, county, name, data, geog)" + " VALUES (%s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (state_fips, row.COUNTY, row.BASENAME, json.dumps(data_json), geog)
+		values = (state, row.COUNTY, row.BASENAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
 		conn.commit()
-		load_tracts(state_fips, row.COUNTY)
+		if load_tracts:
+			tracts(state, row.COUNTY)
 
 
 	cur.close()
 
-def load_states():
+@click.command()
+@click.option('--load-counties', default=False, help='Load counties from each state')
+@click.option('--load-tracts', default=False, help='Load tracts from each county')
+def states(load_counties, load_tracts):
 	cnx = cenpy.base.Connection('DECENNIALSF12010')
 	cnx.set_mapservice('State_County')
 
@@ -101,6 +118,8 @@ def load_states():
 		query = "INSERT into states (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
 		values = (row.STATE, row.BASENAME, json.dumps(data_json), geog)
 		cur.execute(query, values)
+		if load_counties:
+			counties(row.STATE, load_tracts)
 
 	conn.commit()
 	cur.close()
@@ -112,10 +131,12 @@ def test_county():
 	conn.commit()
 	cur.close()
 
+cli.add_command(states)
+cli.add_command(places)
+cli.add_command(counties)
+cli.add_command(tracts)
 
-#load_states()
-#load_tracts('06', '067')
-load_counties('06')
-#load_places('06')
+if __name__ == '__main__':
+    cli()
 
 conn.close()
