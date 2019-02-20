@@ -58,7 +58,9 @@ create table if not exists tracts
 	state text, 
 	county text,
 	name text,
-	data json UNIQUE, 
+	data json, 
+	objid text UNIQUE,
+	centroid geography(POINT),
 	geog geography(MULTIPOLYGON)
 );
 

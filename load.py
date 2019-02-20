@@ -28,19 +28,21 @@ def tracts(state, county):
 	dt = geo.get_tract_data(state, county)
 	cur = conn.cursor()
 	for index, row in dt.iterrows():
-		print(row.TRACT)
+		print(row.STATE + "-" + row.TRACT)
 		geog = row.geometry.__geo_interface__
 		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
+		centroid = "SRID=4326;POINT(" + row.CENTLAT.replace("+", "") + " " + row.CENTLON.replace("+", "") + ")"
 		
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'tract', row.TRACT, state)
 
-		query = "INSERT into tracts (state, county, name, data, geog)" + " VALUES (%s, %s, %s, %s, (ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (state, county, row.TRACT, json.dumps(data_json), geog)
+		query = "INSERT into tracts (state, county, name, data, centroid, objid, geog) VALUES (%s, %s, %s, %s, %s, %s, ST_FlipCoordinates(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
+		values = (row.STATE, row.COUNTY, row.TRACT, json.dumps(data_json), centroid, row.OBJECTID, geog)
+
 		cur.execute(query, values)
 
-	conn.commit()
+		conn.commit()
 	cur.close()
 
 @click.command()

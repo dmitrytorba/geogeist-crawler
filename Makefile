@@ -23,6 +23,7 @@ install:
 	python3 -m venv venv
 	. venv/bin/activate
 	pip install -r requirements.txt
+	export MAP_KEY=`cat map_key.txt`
 
 clean:
 	rm -f static/main.js
