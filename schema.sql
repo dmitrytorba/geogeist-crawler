@@ -57,8 +57,8 @@ create table if not exists tracts
 	gid serial primary key, 
 	state text, 
 	county text,
-	name text UNIQUE,
-	data json, 
+	name text,
+	data json UNIQUE, 
 	geog geography(MULTIPOLYGON)
 );
 
