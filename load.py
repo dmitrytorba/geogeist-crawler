@@ -32,13 +32,13 @@ def tracts(state, county):
 		geog = row.geometry.__geo_interface__
 		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
-		centroid = "SRID=4326;POINT(" + row.CENTLAT.replace("+", "") + " " + row.CENTLON.replace("+", "") + ")"
+		centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
 		
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'tract', row.TRACT, state)
 
-		query = "INSERT into tracts (state, county, name, data, centroid, objid, geog) VALUES (%s, %s, %s, %s, %s, %s, ST_FlipCoordinates(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (row.STATE, row.COUNTY, row.TRACT, json.dumps(data_json), centroid, row.OBJECTID, geog)
+		query = "INSERT into tracts (state, county, name, data, centroid, objid, area, geog) VALUES (%s, %s, %s, %s, %s, %s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))"
+		values = (row.STATE, row.COUNTY, row.TRACT, json.dumps(data_json), centroid, row.OBJECTID, row.AREALAND, geog)
 
 		cur.execute(query, values)
 
@@ -82,12 +82,14 @@ def counties(state, load_tracts):
 		geog = row.geometry.__geo_interface__
 		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
+		centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
 
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'county', row.BASENAME, state)
 	
-		query = "INSERT into counties (state, county, name, data, geog)" + " VALUES (%s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (state, row.COUNTY, row.BASENAME, json.dumps(data_json), geog)
+		query = """INSERT into counties (state, county, name, data, centroid, area, geog)
+					VALUES (%s, %s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
+		values = (row.STATE, row.COUNTY, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
 		cur.execute(query, values)
 		conn.commit()
 		if load_tracts:
@@ -113,12 +115,14 @@ def states(load_counties, load_tracts):
 		geog = row.geometry.__geo_interface__
 		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
+		centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
 
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'state', row.BASENAME, row.STATE)
 
-		query = "INSERT into states (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (row.STATE, row.BASENAME, json.dumps(data_json), geog)
+		query = """INSERT into states (state, name, data, centroid, area, geog)
+					VALUES (%s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
+		values = (row.STATE, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
 		cur.execute(query, values)
 		if load_counties:
 			counties(row.STATE, load_tracts)

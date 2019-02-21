@@ -21,6 +21,8 @@ create table if not exists states
 	state text UNIQUE, 
 	name text, 
 	data json, 
+	area numeric,
+	centroid geography(POINT),
 	geog geography(MULTIPOLYGON)
 );
 
@@ -34,6 +36,8 @@ create table if not exists counties
 	county text UNIQUE,
 	name text,
 	data json, 
+	area numeric,
+	centroid geography(POINT),
 	geog geography(MULTIPOLYGON)
 );
 
@@ -60,8 +64,9 @@ create table if not exists tracts
 	name text,
 	data json, 
 	objid text UNIQUE,
-	centroid geography(POINT),
-	geog geography(MULTIPOLYGON)
+	area numeric,
+	centroid geography(POINT,4326),
+	geog geography(MULTIPOLYGON,4326)
 );
 
 grant all privileges on table tracts to geogeist;
