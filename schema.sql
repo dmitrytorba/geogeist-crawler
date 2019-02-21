@@ -22,8 +22,8 @@ create table if not exists states
 	name text, 
 	data json, 
 	area numeric,
-	centroid geography(POINT),
-	geog geography(MULTIPOLYGON)
+	centroid geography(POINT,4326),
+	geog geography(MULTIPOLYGON,4326)
 );
 
 grant all privileges on table states to geogeist;
@@ -37,8 +37,8 @@ create table if not exists counties
 	name text,
 	data json, 
 	area numeric,
-	centroid geography(POINT),
-	geog geography(MULTIPOLYGON)
+	centroid geography(POINT,4326),
+	geog geography(MULTIPOLYGON,4326)
 );
 
 grant all privileges on table counties to geogeist;
@@ -50,7 +50,9 @@ create table if not exists places
 	state text, 
 	name text UNIQUE,
 	data json, 
-	geog geography(MULTIPOLYGON)
+	area numeric,
+	centroid geography(POINT,4326),
+	geog geography(MULTIPOLYGON,4326)
 );
 
 grant all privileges on table places to geogeist;

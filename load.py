@@ -57,12 +57,13 @@ def places(state):
 		geog = row.geometry.__geo_interface__
 		geog["crs"] = geo_info 
 		geog = json.dumps(geog)
+		centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
 
 		data_json = geo.data_json(row)
 		geo.draw_chart(data_json, 'place', row.LSAD_NAME, state)
 		
-		query = "INSERT into places (state, name, data, geog)" + " VALUES (%s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
-		values = (state, row.LSAD_NAME, json.dumps(data_json), geog)
+		query = "INSERT into places (state, name, data, centroid, area, geog)" + " VALUES (%s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
+		values = (row.STATE, row.LSAD_NAME, json.dumps(data_json), centroid, row.AREALAND, geog)
 		cur.execute(query, values)
 
 	conn.commit()
