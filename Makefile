@@ -38,3 +38,6 @@ db:
 
 upload:
 	gsutil rsync -d static gs://geogeist-227901.appspot.com/static
+
+connect:
+	./bin/cloud_sql_proxy -U geogeist -h 127.0.0.1  --port 5433

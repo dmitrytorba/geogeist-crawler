@@ -7,7 +7,7 @@ import os
 import pandas as pd
 import click
 
-conn = psycopg2.connect(user='geogeist', password='password',
+conn = psycopg2.connect(user='geogeist', password=os.environ['DBPASS'],
                         host='localhost', port='5432')
 
 geo_info = {
