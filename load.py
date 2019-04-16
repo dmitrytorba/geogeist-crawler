@@ -108,7 +108,7 @@ def counties(ctx, state, load_tracts):
 		else:
 			conn.commit()
 		if load_tracts:
-			ctx.forward(tracts, county=row.COUNTY)
+			ctx.invoke(tracts, state=state, county=row.COUNTY)
 
 
 	cur.close()
