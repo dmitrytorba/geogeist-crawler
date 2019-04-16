@@ -40,9 +40,13 @@ def tracts(state, county):
 		query = "INSERT into tracts (state, county, name, data, centroid, objid, area, geog) VALUES (%s, %s, %s, %s, %s, %s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))"
 		values = (row.STATE, row.COUNTY, row.TRACT, json.dumps(data_json), centroid, row.OBJECTID, row.AREALAND, geog)
 
-		cur.execute(query, values)
+		try:
+			cur.execute(query, values)
+		except psycopg2.IntegrityError:
+			conn.rollback()
+		else:
+			conn.commit()
 
-		conn.commit()
 	cur.close()
 
 @click.command()
@@ -64,9 +68,13 @@ def places(state):
 		
 		query = "INSERT into places (state, name, data, centroid, area, geog)" + " VALUES (%s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"
 		values = (row.STATE, row.LSAD_NAME, json.dumps(data_json), centroid, row.AREALAND, geog)
-		cur.execute(query, values)
+		try:
+			cur.execute(query, values)
+		except psycopg2.IntegrityError:
+			conn.rollback()
+		else:
+			conn.commit()
 
-	conn.commit()
 	cur.close()
 
 @click.command()
@@ -91,8 +99,12 @@ def counties(state, load_tracts):
 		query = """INSERT into counties (state, county, name, data, centroid, area, geog)
 					VALUES (%s, %s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
 		values = (row.STATE, row.COUNTY, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
-		cur.execute(query, values)
-		conn.commit()
+		try:
+			cur.execute(query, values)
+		except psycopg2.IntegrityError:
+			conn.rollback()
+		else:
+			conn.commit()
 		if load_tracts:
 			tracts(state, row.COUNTY)
 
@@ -124,11 +136,15 @@ def states(load_counties, load_tracts):
 		query = """INSERT into states (state, name, data, centroid, area, geog)
 					VALUES (%s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
 		values = (row.STATE, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
-		cur.execute(query, values)
+		try:
+			cur.execute(query, values)
+		except psycopg2.IntegrityError:
+			conn.rollback()
+		else:
+			conn.commit()
 		if load_counties:
 			counties(row.STATE, load_tracts)
 
-	conn.commit()
 	cur.close()
 
 def test_county():
