@@ -79,7 +79,7 @@ def places(state):
 
 @click.command()
 @click.option('--state', help='State FIPS code')
-@click.option('--load-tracts', default=False, help='Load tracts from each county')
+@click.option('--load-tracts/--no-tracts', default=False, help='Load tracts from each county')
 def counties(state, load_tracts):
 	print('Loading counties from state ' + state)
 	dt = geo.get_county_data(state)
@@ -112,8 +112,8 @@ def counties(state, load_tracts):
 	cur.close()
 
 @click.command()
-@click.option('--load-counties', default=False, help='Load counties from each state')
-@click.option('--load-tracts', default=False, help='Load tracts from each county')
+@click.option('--load-counties/--no-counties', default=False, help='Load counties from each state')
+@click.option('--load-tracts/--no-tracts', default=False, help='Load tracts from each county')
 def states(load_counties, load_tracts):
 	cnx = cenpy.base.Connection('DECENNIALSF12010')
 	cnx.set_mapservice('State_County')
