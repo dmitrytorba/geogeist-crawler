@@ -81,7 +81,8 @@ def places(state):
 @click.command()
 @click.option('--state', help='State FIPS code')
 @click.option('--load-tracts/--no-tracts', default=False, help='Load tracts from each county')
-def counties(state, load_tracts):
+@click.pass_context
+def counties(ctx, state, load_tracts):
 	print('Loading counties from state ' + state)
 	dt = geo.get_county_data(state)
 
@@ -107,8 +108,7 @@ def counties(state, load_tracts):
 		else:
 			conn.commit()
 		if load_tracts:
-			print('tracts(' + state + ', ' + row.COUNTY + ')')
-			tracts(state, row.COUNTY)
+			ctx.forward(tracts, county=row.COUNTY)
 
 
 	cur.close()
