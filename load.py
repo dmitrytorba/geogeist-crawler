@@ -25,6 +25,7 @@ def cli():
 @click.option('--state', help='State FIPS code')
 @click.option('--county', help='County code')
 def tracts(state, county):
+	print('Loading tracts from county ' + county)
 	dt = geo.get_tract_data(state, county)
 	cur = conn.cursor()
 	for index, row in dt.iterrows():
@@ -106,6 +107,7 @@ def counties(state, load_tracts):
 		else:
 			conn.commit()
 		if load_tracts:
+			print('tracts(' + state + ', ' + row.COUNTY + ')')
 			tracts(state, row.COUNTY)
 
 
