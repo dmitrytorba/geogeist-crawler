@@ -121,7 +121,7 @@ def states(ctx, load_counties, load_tracts):
 	cnx = cenpy.base.Connection('DECENNIALSF12010')
 	cnx.set_mapservice('State_County')
 
-	data = cnx.query(geo.get_cols(), geo_unit = 'state:*')
+	data = cnx.query(geo.get_cols(), geo_unit = 'state:*', apikey = os.environ['APIKEY'])
 	geodata = cnx.mapservice.query(layer=0, where='state is not null')
 	dt = pd.merge(data, geodata, left_on='state', right_on='STATE', how='outer')
 	cur = conn.cursor()
