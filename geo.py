@@ -11,6 +11,7 @@ import pyproj
 
 conn = c.base.Connection('DECENNIALSF12010')
 conn.set_mapservice('tigerWMS_Census2010')
+apikey = os.environ['APIKEY']
 
 def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
     file_name = 'census_state_' + state_fips + '_' + geo_unit
@@ -44,7 +45,8 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
             try:
                 data = conn.query(cols,
                                   geo_unit = geo_unit + ':*',
-                                  geo_filter = g_filter)
+                                  geo_filter = g_filter,
+                                  apikey = apikey)
             except e:
                 print(e)
     data.to_pickle(file_name)
