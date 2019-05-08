@@ -8,6 +8,8 @@ import numpy as np
 import pysal
 import math
 import pyproj
+import os
+import urllib2
 
 conn = c.base.Connection('DECENNIALSF12010')
 conn.set_mapservice('tigerWMS_Census2010')
@@ -36,8 +38,12 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
                w = 'county=' + county
             try: 
                 data = conn.mapservice.query(layer=layers[geo_unit], where=w)
-            except e:
-                print(e)
+            except urllib2.HTTPError as err:
+                print('map server query returns error ' + err.code)
+                if err.code == 500:
+                    print('this map needs re-download: ' + w)
+                else:
+                    raise
         else:
             g_filter = { 'state': state_fips }
             if geo_unit == 'tract':
@@ -47,8 +53,12 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
                                   geo_unit = geo_unit + ':*',
                                   geo_filter = g_filter,
                                   apikey = apikey)
-            except e:
-                print(e)
+            except urllib2.HTTPError as err:
+                print('data server query returns error ' + err.code)
+                if err.code == 500:
+                    print('this data needs re-download: ' + w)
+                else:
+                    raise
     data.to_pickle(file_name)
     return data
 
