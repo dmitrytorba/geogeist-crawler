@@ -9,7 +9,8 @@ import pysal
 import math
 import pyproj
 import os
-import urllib3.exceptions.HTTPError
+import urllib3.exceptions
+import time
 
 conn = c.base.Connection('DECENNIALSF12010')
 conn.set_mapservice('tigerWMS_Census2010')
@@ -42,6 +43,8 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
                 print('map server query returns error ' + err.code)
                 if err.code == 500:
                     print('this map needs re-download: ' + w)
+                    # throttle any subsequent requests
+                    time.sleep(120)
                 else:
                     raise
         else:
@@ -57,6 +60,8 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
                 print('data server query returns error ' + err.code)
                 if err.code == 500:
                     print('this data needs re-download: ' + w)
+                    # throttle any subsequent requests
+                    time.sleep(120)
                 else:
                     raise
     data.to_pickle(file_name)
