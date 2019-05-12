@@ -8,7 +8,7 @@ import pandas as pd
 import click
 
 conn = psycopg2.connect(user='geogeist', password=os.environ['DBPASS'],
-                        host='localhost', port='5432')
+						host='localhost', port='5432')
 
 geo_info = {
 	"type": "name",
@@ -19,7 +19,7 @@ geo_info = {
 
 @click.group()
 def cli():
-    pass
+	pass
 
 @click.command()
 @click.option('--state', help='State FIPS code')
@@ -136,10 +136,10 @@ def states(ctx, load_counties, load_tracts, load_places):
 	for index, row in dt.iterrows():
 		print(row.BASENAME)
 		cur.execute("SELECT last_county_scan, last_place_scan FROM states WHERE name = %s", (row.BASENAME,))
-    	if cur.fetchone() is not None:
-    		print('... already in the DB')
-    		#TODO: rescan children if needed
-    	else:
+		if cur.fetchone() is not None:
+			print('... already in the DB')
+			#TODO: rescan children if needed
+		else:
 			geog = row.geometry.__geo_interface__
 			geog["crs"] = geo_info 
 			geog = json.dumps(geog)
@@ -182,6 +182,6 @@ cli.add_command(counties)
 cli.add_command(tracts)
 
 if __name__ == '__main__':
-    cli()
+	cli()
 
 conn.close()
