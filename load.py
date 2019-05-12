@@ -91,9 +91,12 @@ def counties(ctx, state, load_tracts):
 	for index, row in dt.iterrows():
 		print(row.BASENAME)
 		cur.execute("SELECT last_tract_scan FROM counties WHERE name = %s", (row.BASENAME,))
-		if cur.fetchone() is not None:
+		county = cur.fetchone()
+		if county is not None:
 			print('... already in the DB')
 			#TODO: rescan tracts if needed
+			if county[0] is not None:
+				print('... scanning tracts')
 		else:
 			geog = row.geometry.__geo_interface__
 			geog["crs"] = geo_info 
@@ -136,9 +139,14 @@ def states(ctx, load_counties, load_tracts, load_places):
 	for index, row in dt.iterrows():
 		print(row.BASENAME)
 		cur.execute("SELECT last_county_scan, last_place_scan FROM states WHERE name = %s", (row.BASENAME,))
-		if cur.fetchone() is not None:
+		state = cur.fetchone()
+		if state is not None:
 			print('... already in the DB')
-			#TODO: rescan children if needed
+			#TODO: compare timestamps
+			if state[0] is not None:
+				print('... scaning counties')
+			if state[1] is not None:
+				print('... scaning places')
 		else:
 			geog = row.geometry.__geo_interface__
 			geog["crs"] = geo_info 
