@@ -9,7 +9,7 @@ import pysal
 import math
 import pyproj
 import os
-import urllib3.exceptions
+from urllib3.exceptions import HTTPError
 import time
 
 conn = c.base.Connection('DECENNIALSF12010')
