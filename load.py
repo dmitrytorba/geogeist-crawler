@@ -91,10 +91,10 @@ def counties(ctx, state, load_tracts):
 	for index, row in dt.iterrows():
 		print(row.BASENAME)
 		cur.execute("SELECT last_tract_scan FROM counties WHERE name = %s", (row.BASENAME,))
-    	if cur.fetchone() is not None:
-    		print('... already in the DB')
-    		#TODO: rescan tracts if needed
-    	else:
+		if cur.fetchone() is not None:
+			print('... already in the DB')
+			#TODO: rescan tracts if needed
+		else:
 			geog = row.geometry.__geo_interface__
 			geog["crs"] = geo_info 
 			geog = json.dumps(geog)
