@@ -90,25 +90,30 @@ def counties(ctx, state, load_tracts):
 
 	for index, row in dt.iterrows():
 		print(row.BASENAME)
-		geog = row.geometry.__geo_interface__
-		geog["crs"] = geo_info 
-		geog = json.dumps(geog)
-		centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
+		cur.execute("SELECT last_tract_scan FROM counties WHERE name = %s", (row.BASENAME,))
+    	if cur.fetchone() is not None:
+    		print('... already in the DB')
+    		#TODO: rescan tracts if needed
+    	else:
+			geog = row.geometry.__geo_interface__
+			geog["crs"] = geo_info 
+			geog = json.dumps(geog)
+			centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
 
-		data_json = geo.data_json(row)
-		geo.draw_chart(data_json, 'county', row.BASENAME, row.STATE)
-	
-		query = """INSERT into counties (state, county, name, data, centroid, area, geog)
-					VALUES (%s, %s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
-		values = (row.STATE, row.COUNTY, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
-		try:
-			cur.execute(query, values)
-		except psycopg2.IntegrityError:
-			conn.rollback()
-		else:
-			conn.commit()
-		if load_tracts:
-			ctx.invoke(tracts, state=state, county=row.COUNTY)
+			data_json = geo.data_json(row)
+			geo.draw_chart(data_json, 'county', row.BASENAME, row.STATE)
+		
+			query = """INSERT into counties (state, county, name, data, centroid, area, geog)
+						VALUES (%s, %s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
+			values = (row.STATE, row.COUNTY, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
+			try:
+				cur.execute(query, values)
+			except psycopg2.IntegrityError:
+				conn.rollback()
+			else:
+				conn.commit()
+			if load_tracts:
+				ctx.invoke(tracts, state=state, county=row.COUNTY)
 
 	cur.close()
 
@@ -128,27 +133,32 @@ def states(ctx, load_counties, load_tracts, load_places):
 
 	for index, row in dt.iterrows():
 		print(row.BASENAME)
-		geog = row.geometry.__geo_interface__
-		geog["crs"] = geo_info 
-		geog = json.dumps(geog)
-		centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
+		cur.execute("SELECT last_county_scan, last_place_scan FROM states WHERE name = %s", (row.BASENAME,))
+    	if cur.fetchone() is not None:
+    		print('... already in the DB')
+    		#TODO: rescan children if needed
+    	else:
+			geog = row.geometry.__geo_interface__
+			geog["crs"] = geo_info 
+			geog = json.dumps(geog)
+			centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
 
-		data_json = geo.data_json(row)
-		geo.draw_chart(data_json, 'state', row.BASENAME, row.STATE)
+			data_json = geo.data_json(row)
+			geo.draw_chart(data_json, 'state', row.BASENAME, row.STATE)
 
-		query = """INSERT into states (state, name, data, centroid, area, geog)
-					VALUES (%s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
-		values = (row.STATE, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
-		try:
-			cur.execute(query, values)
-		except psycopg2.IntegrityError:
-			conn.rollback()
-		else:
-			conn.commit()
-		if load_counties:
-			ctx.invoke(counties, state=row.STATE, load_tracts=load_tracts)
-		if load_places:
-			ctx.invoke(places, state=row.STATE)
+			query = """INSERT into states (state, name, data, centroid, area, geog)
+						VALUES (%s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
+			values = (row.STATE, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
+			try:
+				cur.execute(query, values)
+			except psycopg2.IntegrityError:
+				conn.rollback()
+			else:
+				conn.commit()
+			if load_counties:
+				ctx.invoke(counties, state=row.STATE, load_tracts=load_tracts)
+			if load_places:
+				ctx.invoke(places, state=row.STATE)
 
 
 	cur.close()

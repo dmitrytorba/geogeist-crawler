@@ -22,6 +22,8 @@ create table if not exists states
 	name text, 
 	data json, 
 	area numeric,
+	last_county_scan timestamptz,
+	last_place_scan timestamptz,
 	centroid geography(POINT,4326),
 	geog geography(MULTIPOLYGON,4326)
 );
@@ -37,6 +39,7 @@ create table if not exists counties
 	name text,
 	data json, 
 	area numeric,
+	last_tract_scan timestamptz,
 	centroid geography(POINT,4326),
 	geog geography(MULTIPOLYGON,4326)
 );
