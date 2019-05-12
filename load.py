@@ -97,7 +97,7 @@ def counties(ctx, state, load_tracts):
 			if county[0] is None:
 				print('... scanning tracts')
 				ctx.invoke(tracts, state=state, county=row.COUNTY)
-				cur.execute("UPDATE counties SET last_tract_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				cur.execute("UPDATE counties SET last_tract_scan=NOW() WHERE name = %s", (row.BASENAME,))
 				conn.commit()
 		else:
 			geog = row.geometry.__geo_interface__
@@ -119,7 +119,7 @@ def counties(ctx, state, load_tracts):
 				conn.commit()
 			if load_tracts:
 				ctx.invoke(tracts, state=state, county=row.COUNTY)
-				cur.execute("UPDATE counties SET last_tract_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				cur.execute("UPDATE counties SET last_tract_scan=NOW() WHERE name = %s", (row.BASENAME,))
 				conn.commit()
 
 	cur.close()
@@ -148,12 +148,12 @@ def states(ctx, load_counties, load_tracts, load_places):
 			if state[0] is None:
 				print('... scaning counties')
 				ctx.invoke(counties, state=row.STATE, load_tracts=load_tracts)
-				cur.execute("UPDATE states SET last_county_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				cur.execute("UPDATE states SET last_county_scan=NOW() WHERE name = %s", (row.BASENAME,))
 				conn.commit()
 			if state[1] is None:
 				print('... scaning places')
 				ctx.invoke(places, state=row.STATE)
-				cur.execute("UPDATE states SET last_place_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				cur.execute("UPDATE states SET last_place_scan=NOW() WHERE name = %s", (row.BASENAME,))
 				conn.commit()
 		else:
 			geog = row.geometry.__geo_interface__
@@ -175,11 +175,11 @@ def states(ctx, load_counties, load_tracts, load_places):
 				conn.commit()
 			if load_counties:
 				ctx.invoke(counties, state=row.STATE, load_tracts=load_tracts)
-				cur.execute("UPDATE states SET last_county_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				cur.execute("UPDATE states SET last_county_scan=NOW() WHERE name = %s", (row.BASENAME,))
 				conn.commit()
 			if load_places:
 				ctx.invoke(places, state=row.STATE)
-				cur.execute("UPDATE states SET last_place_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				cur.execute("UPDATE states SET last_place_scan=NOW() WHERE name = %s", (row.BASENAME,))
 				conn.commit()
 
 
