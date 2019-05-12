@@ -93,9 +93,12 @@ def counties(ctx, state, load_tracts):
 		cur.execute("SELECT last_tract_scan FROM counties WHERE name = %s", (row.BASENAME,))
 		county = cur.fetchone()
 		if county is not None:
-			print('... already in the DB')
+			print('... county already in the DB')
 			if county[0] is None:
 				print('... scanning tracts')
+				ctx.invoke(tracts, state=state, county=row.COUNTY)
+				cur.execute("UPDATE counties SET last_tract_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				conn.commit()
 		else:
 			geog = row.geometry.__geo_interface__
 			geog["crs"] = geo_info 
@@ -140,12 +143,18 @@ def states(ctx, load_counties, load_tracts, load_places):
 		cur.execute("SELECT last_county_scan, last_place_scan FROM states WHERE name = %s", (row.BASENAME,))
 		state = cur.fetchone()
 		if state is not None:
-			print('... already in the DB')
+			print('... state is already in the DB')
 			#TODO: compare timestamps
 			if state[0] is None:
 				print('... scaning counties')
+				ctx.invoke(counties, state=row.STATE, load_tracts=load_tracts)
+				cur.execute("UPDATE states SET last_county_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				conn.commit()
 			if state[1] is None:
 				print('... scaning places')
+				ctx.invoke(places, state=row.STATE)
+				cur.execute("UPDATE states SET last_place_scan=NOW() WHERE  = %s", (row.BASENAME,))
+				conn.commit()
 		else:
 			geog = row.geometry.__geo_interface__
 			geog["crs"] = geo_info 
