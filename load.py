@@ -94,7 +94,6 @@ def counties(ctx, state, load_tracts):
 		county = cur.fetchone()
 		if county is not None:
 			print('... already in the DB')
-			#TODO: rescan tracts if needed
 			if county[0] is not None:
 				print('... scanning tracts')
 		else:
@@ -141,7 +140,7 @@ def states(ctx, load_counties, load_tracts, load_places):
 		cur.execute("SELECT last_county_scan, last_place_scan FROM states WHERE name = %s", (row.BASENAME,))
 		state = cur.fetchone()
 		if state is not None:
-			print('... already in the DB')
+			print('... already in the DB ' + state[0])
 			#TODO: compare timestamps
 			if state[0] is not None:
 				print('... scaning counties')
