@@ -94,7 +94,7 @@ def counties(ctx, state, load_tracts):
 		county = cur.fetchone()
 		if county is not None:
 			print('... already in the DB')
-			if county[0] is not None:
+			if county[0] is None:
 				print('... scanning tracts')
 		else:
 			geog = row.geometry.__geo_interface__
@@ -140,11 +140,11 @@ def states(ctx, load_counties, load_tracts, load_places):
 		cur.execute("SELECT last_county_scan, last_place_scan FROM states WHERE name = %s", (row.BASENAME,))
 		state = cur.fetchone()
 		if state is not None:
-			print('... already in the DB ' + state[0])
+			print('... already in the DB')
 			#TODO: compare timestamps
-			if state[0] is not None:
+			if state[0] is None:
 				print('... scaning counties')
-			if state[1] is not None:
+			if state[1] is None:
 				print('... scaning places')
 		else:
 			geog = row.geometry.__geo_interface__
