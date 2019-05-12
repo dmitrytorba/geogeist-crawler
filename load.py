@@ -110,14 +110,14 @@ def counties(ctx, state, load_tracts):
 		if load_tracts:
 			ctx.invoke(tracts, state=state, county=row.COUNTY)
 
-
 	cur.close()
 
 @click.command()
 @click.option('--load-counties/--no-counties', default=False, help='Load counties from each state')
 @click.option('--load-tracts/--no-tracts', default=False, help='Load tracts from each county')
+@click.option('--load-places/--no-places', default=False, help='Load places from each state')
 @click.pass_context
-def states(ctx, load_counties, load_tracts):
+def states(ctx, load_counties, load_tracts, load_places):
 	cnx = cenpy.base.Connection('DECENNIALSF12010')
 	cnx.set_mapservice('State_County')
 
@@ -147,6 +147,9 @@ def states(ctx, load_counties, load_tracts):
 			conn.commit()
 		if load_counties:
 			ctx.invoke(counties, state=row.STATE, load_tracts=load_tracts)
+		if load_places:
+			ctx.invoke(places, state=row.STATE)
+
 
 	cur.close()
 
