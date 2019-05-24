@@ -31,25 +31,25 @@ def tracts(state, county):
 	for index, row in dt.iterrows():
 		cur.execute("SELECT name FROM tract WHERE name = %s", (row.TRACT,))
 		tract = cur.fetchone()
-                if tract is None: 
-                        geog = row.geometry.__geo_interface__
-		        geog["crs"] = geo_info 
-		        geog = json.dumps(geog)
-		        centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
-		
-		        data_json = geo.data_json(row)
-		        geo.draw_chart(data_json, 'tract', row.TRACT, row.STATE)
+		if tract is None:
+			geog = row.geometry.__geo_interface__
+			geog["crs"] = geo_info
+			geog = json.dumps(geog)
+			centroid = "SRID=4326;POINT(" + row.CENTLON.replace("+", "") + " " + row.CENTLAT.replace("+", "") + ")"
 
-		        query = "INSERT into tracts (state, county, name, data, centroid, objid, area, geog) VALUES (%s, %s, %s, %s, %s, %s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))"
-		        values = (row.STATE, row.COUNTY, row.TRACT, json.dumps(data_json), centroid, row.OBJECTID, row.AREALAND, geog)
+			data_json = geo.data_json(row)
+			geo.draw_chart(data_json, 'tract', row.TRACT, row.STATE)
 
-		        try:
-			        cur.execute(query, values)
-		        except psycopg2.IntegrityError:
-			        conn.rollback()
-		        else:
-		                print(row.STATE + "-" + row.TRACT)
-			        conn.commit()
+			query = "INSERT into tracts (state, county, name, data, centroid, objid, area, geog) VALUES (%s, %s, %s, %s, %s, %s, %s, ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326)))"
+			values = (row.STATE, row.COUNTY, row.TRACT, json.dumps(data_json), centroid, row.OBJECTID, row.AREALAND, geog)
+
+			try:
+				cur.execute(query, values)
+			except psycopg2.IntegrityError:
+				conn.rollback()
+			else:
+				print(row.STATE + "-" + row.TRACT)
+				conn.commit()
 
 	cur.close()
 
