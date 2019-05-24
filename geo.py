@@ -15,8 +15,9 @@ from requests.exceptions import HTTPError
 conn = c.base.Connection('DECENNIALSF12010')
 conn.set_mapservice('tigerWMS_Census2010')
 apikey = os.environ['APIKEY']
+PAUSE = 120
 
-def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
+def cached_query(state_fips, geo_unit, cols=[], is_map=False, county='', retry=0):
     file_name = 'census_state_' + state_fips + '_' + geo_unit
     if geo_unit == 'tract':
         file_name += '_' + county
@@ -44,9 +45,9 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
                 print('map server query returns error ' + str(code))
                 if code == 500:
                     print('this map needs re-download: ' + w)
-                    # throttle any subsequent requests
-                    time.sleep(120)
-                    return None
+                    retry += 1
+                    time.sleep(PAUSE * retry)
+                    return cached_query(state_fips, geo_unit, cols, is_map, county, retry)
                 else:
                     raise
         else:
@@ -63,9 +64,9 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county=''):
                 print('data server query returns error ' + str(code))
                 if code == 500:
                     print('this data needs re-download: ' + geo_unit)
-                    # throttle any subsequent requests
-                    time.sleep(120)
-                    return None
+                    retry += 1
+                    time.sleep(PAUSE * retry)
+                    return cached_query(state_fips, geo_unit, cols, is_map, county, retry)
                 else:
                     raise
     data.to_pickle(file_name)
