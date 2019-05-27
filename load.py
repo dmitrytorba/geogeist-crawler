@@ -117,6 +117,7 @@ def counties(ctx, state, load_tracts):
 			try:
 				cur.execute(query, values)
 			except psycopg2.IntegrityError:
+				print("County save failed: " + row.BASENAME)
 				conn.rollback()
 			else:
 				print("County saved: " + row.BASENAME)
