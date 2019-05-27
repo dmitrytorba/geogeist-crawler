@@ -29,7 +29,7 @@ def tracts(state, county):
 	dt = geo.get_tract_data(state, county)
 	cur = conn.cursor()
 	for index, row in dt.iterrows():
-		cur.execute("SELECT name FROM tract WHERE name = %s", (row.TRACT,))
+		cur.execute("SELECT name FROM tracts WHERE name = %s", (row.TRACT,))
 		tract = cur.fetchone()
 		if tract is None:
 			geog = row.geometry.__geo_interface__
