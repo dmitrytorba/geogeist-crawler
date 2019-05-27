@@ -93,7 +93,7 @@ def counties(ctx, state, load_tracts):
 
 	for index, row in dt.iterrows():
 		print(row.BASENAME)
-		cur.execute("SELECT last_tract_scan FROM counties WHERE name = %s", (row.BASENAME,))
+		cur.execute("SELECT last_tract_scan FROM counties WHERE name = %s AND state = %s", (row.BASENAME,row.STATE))
 		county = cur.fetchone()
 		if county is not None:
 			print('... county already in the DB')
@@ -119,10 +119,11 @@ def counties(ctx, state, load_tracts):
 			except psycopg2.IntegrityError:
 				conn.rollback()
 			else:
+				print("County saved: " + row.BASENAME)
 				conn.commit()
 			if load_tracts:
 				ctx.invoke(tracts, state=state, county=row.COUNTY)
-				cur.execute("UPDATE counties SET last_tract_scan=NOW() WHERE name = %s", (row.BASENAME,))
+				cur.execute("UPDATE counties SET last_tract_scan=NOW() WHERE name = %s AND state = %s", (row.BASENAME,row.STATE))
 				conn.commit()
 
 	cur.close()
