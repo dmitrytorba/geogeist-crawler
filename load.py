@@ -113,7 +113,7 @@ def counties(ctx, state, load_tracts):
 		
 			query = """INSERT into counties (state, county, name, data, centroid, area, geog)
 						VALUES (%s, %s, %s, %s, %s, %s, ST_Force2D(ST_Multi(ST_Transform(ST_GeomFromGeoJSON(%s),4326))))"""
-			values = (row.STATE, row.COUNTY, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
+			values = (row.STATE, row.STATE+row.COUNTY, row.BASENAME, json.dumps(data_json), centroid, row.AREALAND, geog)
 			try:
 				cur.execute(query, values)
 			except psycopg2.IntegrityError:
