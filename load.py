@@ -47,11 +47,12 @@ def tracts(state, county):
 				cur.execute(query, values)
 			except psycopg2.IntegrityError:
 				conn.rollback()
+				print("Tract save failed: " + row.TRACT)
 			else:
 				print(row.STATE + "-" + row.TRACT)
 				conn.commit()
 		else:
-			print("Tract already in DB: " + row.TRACT)
+			print("Tract already in the DB: " + row.TRACT)
 
 	cur.close()
 
