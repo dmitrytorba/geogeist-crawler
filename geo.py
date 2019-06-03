@@ -28,6 +28,7 @@ def cached_query(state_fips, geo_unit, cols=[], is_map=False, county='', retry=0
     try:
         data = pd.read_pickle(file_name)
     except:
+        print('no pickle, downloading ' + file_name)
         if is_map:
             layers = {
                 'county': 100,
