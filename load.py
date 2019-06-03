@@ -50,6 +50,8 @@ def tracts(state, county):
 			else:
 				print(row.STATE + "-" + row.TRACT)
 				conn.commit()
+		else:
+			print("Tract already in DB: " + row.TRACT)
 
 	cur.close()
 
