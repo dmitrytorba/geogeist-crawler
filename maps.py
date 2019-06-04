@@ -3,6 +3,7 @@ import os
 import json
 import polyline
 import urllib.request
+from urllib.error import HTTPError
 
 conn = psycopg2.connect(user='geogeist', password=os.environ['DBPASS'],
 						host='localhost', port='5432')
@@ -33,12 +34,16 @@ def tracts():
 
 			url = "https://maps.googleapis.com/maps/api/staticmap?size=400x400&center=%s,%s&zoom=14&path=%senc:%s&key=%s" % (centroid[1],centroid[0],"fillcolor:0xAA000033%7Ccolor:0xFFFFFF00%7C",poly,MAP_KEY)
 
-			urllib.request.urlretrieve(url, filename)
+			try:
+				urllib.request.urlretrieve(url, filename)
 
-			data_json['map'] = filename
+				data_json['map'] = filename
 
-			print("rendered: " + filename)
-			cur.execute("UPDATE tracts SET data = %s WHERE gid = %s", (json.dumps(data_json), gid))
+				print("rendered: " + filename)
+				cur.execute("UPDATE tracts SET data = %s WHERE gid = %s", (json.dumps(data_json), gid))
+			except HTTPError as err:
+				print("render failed: " + filename)
+
 	conn.commit()
 	cur.close()
 
