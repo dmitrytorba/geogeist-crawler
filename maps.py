@@ -24,6 +24,7 @@ def tracts():
         gid = row[5]
         filename = "static/tract_map_%s-%s.png" % (state, name)
         if os.path.exists(filename):
+            data_json['map'] = filename
             print('map already exists: ' + filename)
         else:
             # TODO: handle multipolygons
@@ -36,11 +37,11 @@ def tracts():
 
             try:
                 urllib.request.urlretrieve(url, filename)
+                data_json['map'] = filename
                 print("rendered: " + filename)
             except HTTPError as err:
-                print("render failed: " + filename)
+                print("%s render failed: %s" % (filename,err))
 
-        data_json['map'] = filename
         cur.execute("UPDATE tracts SET data = %s WHERE gid = %s", (json.dumps(data_json), gid))
     conn.commit()
     cur.close()
