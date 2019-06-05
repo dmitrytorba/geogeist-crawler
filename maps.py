@@ -2,6 +2,7 @@ import psycopg2
 import os
 import json
 import polyline
+import urllib.parse
 import urllib.request
 from urllib.error import HTTPError
 
@@ -32,6 +33,7 @@ def tracts():
             for item in coords:
                 item.reverse()
             poly = polyline.encode(coords)
+            poly = urllib.parse.quote(poly)
 
             url = "https://maps.googleapis.com/maps/api/staticmap?size=400x400&center=%s,%s&zoom=14&path=%senc:%s&key=%s" % (centroid[1],centroid[0],"fillcolor:0xAA000033%7Ccolor:0xFFFFFF00%7C",poly,MAP_KEY)
 
