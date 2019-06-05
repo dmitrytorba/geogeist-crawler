@@ -3,4 +3,5 @@ node_modules
 *pkl
 static/*
 venv
+env
 map_key.txt
