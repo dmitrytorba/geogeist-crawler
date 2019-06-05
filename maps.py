@@ -40,7 +40,7 @@ def tracts():
                 data_json['map'] = filename
                 print("rendered: " + filename)
             except HTTPError as err:
-                print("%s render failed: %s" % (filename,err))
+                print("%s render failed: %s %s" % (filename,err,url))
 
         cur.execute("UPDATE tracts SET data = %s WHERE gid = %s", (json.dumps(data_json), gid))
     conn.commit()
