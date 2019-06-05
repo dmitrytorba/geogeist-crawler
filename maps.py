@@ -36,14 +36,12 @@ def tracts():
 
 			try:
 				urllib.request.urlretrieve(url, filename)
-
-				data_json['map'] = filename
-
 				print("rendered: " + filename)
-				cur.execute("UPDATE tracts SET data = %s WHERE gid = %s", (json.dumps(data_json), gid))
 			except HTTPError as err:
 				print("render failed: " + filename)
 
+		data_json['map'] = filename
+		cur.execute("UPDATE tracts SET data = %s WHERE gid = %s", (json.dumps(data_json), gid))
 	conn.commit()
 	cur.close()
 
