@@ -14,7 +14,7 @@ URL_MAX = 8192
 
 def tracts():
     cur = conn.cursor()
-    cur.execute("SELECT name,ST_AsGeoJSON(geog),ST_AsGeoJSON(centroid),state,data,gid FROM tracts;")
+    cur.execute("SELECT name,ST_AsGeoJSON(geog),ST_AsGeoJSON(centroid),state,data,gid,county FROM tracts;")
     rows = cur.fetchall()
     for row in rows:
         name = row[0]
@@ -23,7 +23,8 @@ def tracts():
         state = row[3]
         data_json = row[4]
         gid = row[5]
-        filename = "static/tract_map_%s-%s.png" % (state, name)
+        county = row[6]
+        filename = "static/tract_map_%s-%s-%s.png" % (state, county, name)
         if os.path.exists(filename):
             data_json['map'] = filename
             print('map already exists: ' + filename)
@@ -33,7 +34,6 @@ def tracts():
             for item in coords:
                 item.reverse()
             poly = polyline.encode(coords)
-            poly = urllib.parse.quote(poly)
 
             url = "https://maps.googleapis.com/maps/api/staticmap?size=400x400&center=%s,%s&zoom=14&path=%senc:%s&key=%s" % (centroid[1],centroid[0],"fillcolor:0xAA000033%7Ccolor:0xFFFFFF00%7C",poly,MAP_KEY)
 
